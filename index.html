@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北海道 8 天 7 夜旅遊手冊 - 極簡質感版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Montserrat:wght@700;900&display=swap');
+        
+        :root {
+            --hk-accent: #0ea5e9;
+            --hk-bg: #f8fafc;
+            --hk-glass: rgba(255, 255, 255, 0.75);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--hk-bg);
+            color: #1e293b;
+            letter-spacing: -0.01em;
+        }
+
+        /* 頂部裝飾圓圈 */
+        .bg-glow {
+            position: fixed;
+            top: -10%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        /* 日期導航活動狀態 */
+        .day-active {
+            background: #1e293b !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px -5px rgba(30, 41, 59, 0.3);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        /* 毛玻璃卡片 */
+        .glass-card {
+            background: var(--hk-glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+        }
+
+        .checked-item {
+            opacity: 0.4;
+            filter: grayscale(0.8);
+        }
+
+        .content-collapsed {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .content-expanded {
+            max-height: 600px;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-up {
+            animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="pb-32">
+    <div class="bg-glow"></div>
+
+    <!-- Header Section -->
+    <header class="sticky top-0 z-50 transition-all duration-300">
+        <div class="glass-card mx-4 mt-4 rounded-[32px] overflow-hidden">
+            <div class="px-6 pt-6 pb-2 flex justify-between items-start">
+                <div>
+                    <h1 class="text-xs font-montserrat font-black text-sky-500 tracking-[0.4em] uppercase">Hokkaido</h1>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <span class="text-2xl font-black text-slate-800">2026</span>
+                        <span class="text-2xl font-light text-slate-300">/</span>
+                        <span class="text-2xl font-bold text-slate-800">Spring Date</span>
+                    </div>
+                </div>
+                <div class="bg-white/60 rounded-2xl p-3 border border-white/50 text-right">
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Total Budget</p>
+                    <div id="total-budget" class="text-lg font-black text-slate-800 leading-none mt-1">¥ 0</div>
+                </div>
+            </div>
+
+            <!-- Date Scroller -->
+            <div class="px-4 pb-4">
+                <div class="flex overflow-x-auto no-scrollbar py-2 space-x-2 items-center flex-nowrap">
+                    <!-- PREP Button -->
+                    <button onclick="switchView('checklist')" id="btn-checklist" 
+                        class="day-btn flex-shrink-0 w-12 h-12 rounded-2xl bg-white/50 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm">
+                        <span class="text-lg">📋</span>
+                    </button>
+                    
+                    <div id="day-buttons-container" class="flex flex-nowrap space-x-2"></div>
+                </div>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="w-full bg-slate-100/50 h-[3px]">
+                <div id="progress-bar" class="bg-sky-500 h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="content-area" class="px-6 py-8 max-w-lg mx-auto space-y-10">
+        <!-- Content injected by JS -->
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-6 left-6 right-6 z-50">
+        <div class="glass-card rounded-[28px] p-4 flex justify-between items-center shadow-2xl border-white/60">
+            <div class="pl-2">
+                <p id="bottom-label" class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Today's Total</p>
+                <p id="bottom-value" class="text-xl font-black text-slate-800">¥ 0</p>
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="w-12 h-12 flex items-center justify-center text-slate-400 hover:text-sky-500 transition-colors">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button onclick="shareItinerary()" class="bg-sky-500 text-white px-6 h-12 rounded-2xl text-xs font-black tracking-widest uppercase shadow-lg shadow-sky-200 active:scale-95 transition-all">
+                    Share
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        const itinerary = [
+            { 
+                date: "3/26", day: "Day 01", weather: "☁️ 曇り 2°C / 8°C", haiku: "春の雲 旅の始まり 札幌へ",
+                hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 + 地鐵南北線", 
+                activities: [
+                    { title: "新千歲機場抵達", desc: "抵達北海道門戶，建議先到國內線航廈，那裡有豐富的伴手禮與Royce巧克力工廠，更有許多限定美食。" },
+                    { title: "飯店存放行李", desc: "抵達薄野核心區域，安頓後準備展開札幌市區的探索旅程，感受北方大城的氣息。" },
+                    { title: "狸小路 1-7 丁目散策", desc: "橫跨七個街區的百年商店街，藥妝、餐廳、伴手禮店林立，晚上的街頭表演充滿在地活力。" }
+                ], 
+                lunch: "根室花丸壽司", dinner: "GARAKU 湯咖哩" 
+            },
+            { 
+                date: "3/27", day: "Day 02", weather: "☀️ 晴れ 3°C / 10°C", haiku: "学び舎に 春の陽射しや 北大路",
+                hotel: "札幌全日空薄野假日酒店", transport: "地鐵南北線/東豐線", 
+                activities: [
+                    { title: "北海道大學漫步", desc: "感受日本最美校園，漫步著名的銀杏大道與歷史悠久的歐風建築群，體驗學術殿堂的寧靜。" },
+                    { title: "諏訪神社參拜", desc: "著名的「花手水」神社，洗手池中鋪滿季節花卉，是拍照與祈求好運不可錯過的熱點。" },
+                    { title: "札幌啤酒博物館", desc: "日本唯一的啤酒博物館，了解開拓史，並可以在結束後試喝當日最新鮮的開拓使啤酒。" }
+                ], 
+                lunch: "北大中央食堂", dinner: "札幌啤酒園燒肉" 
+            },
+            { 
+                date: "3/28", day: "Day 03", weather: "⛅ 曇り時々晴れ 4°C / 9°C", haiku: "祈り捧ぐ 響くメロディ 春の宵",
+                hotel: "札幌全日空薄野假日酒店", transport: "地鐵東西線 + 東豐線", 
+                activities: [
+                    { title: "北海道神宮", desc: "北海道最大的守護神殿，被圓山原始林環繞，感受與市中心截然不同的肅穆氛圍。" },
+                    { title: "圓山公園", desc: "當地人最愛的休憩場地，連結神宮與動物園，享受初春清新的空氣與森林芬多精。" },
+                    { title: "Vaundy 演唱會 🎸", desc: "旅程的核心時刻！準備好在震撼的音場中與 Vaundy 一起度過難忘的札幌夜晚。" }
+                ], 
+                lunch: "炸豬排 玉藤", dinner: "串鳥居酒屋" 
+            },
+            { 
+                date: "3/29", day: "Day 04", weather: "❄️ 雪 0°C / 5°C", haiku: "小樽路や 運河に舞いし 春の雪",
+                hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 (往返)", 
+                activities: [
+                    { title: "小樽甜點街", desc: "漫步堺町通，六花亭、北菓樓名店林立，是購買精緻甜食與手工玻璃工藝的首選地。" },
+                    { title: "籔半蕎麥麵", desc: "在充滿歷史情懷的石磨麵屋中，品嚐手工蕎麥麵的獨特香氣與Q彈嚼勁。" },
+                    { title: "山中牧場冰淇淋", desc: "牧場直送的極致美味！純粹無添加的奶香，是小樽漫步時必嚐的療癒甜點。" },
+                    { title: "小樽運河夜景", desc: "石造倉庫群與瓦斯燈倒映在靜謐的水面，呈現出北國冬季特有的浪漫與懷舊感。" }
+                ], 
+                lunch: "蕎麥屋 籔半", dinner: "寶壽司" 
+            },
+            { 
+                date: "3/30", day: "Day 05", weather: "☁️ 曇り 1°C / 7°C", haiku: "湯の煙 地獄の谷に 春霞",
+                hotel: "登別第一瀧本館 ♨️", transport: "JR 特急北斗號 + 巴士", 
+                activities: [
+                    { title: "移動至登別", desc: "搭乘特急前往著名的溫泉之鄉。登別以多樣的泉質聞名，是放鬆身心的絕佳站點。" },
+                    { title: "尼克斯海洋公園", desc: "融合北歐建築風格的水族館，最受歡迎的便是憨態可掬的企鵝遊行。" },
+                    { title: "第一瀧本館溫泉", desc: "擁有24小時開放的超大浴場，可一邊泡湯一邊眺望地獄谷的壯闊風景。" }
+                ], 
+                lunch: "自理", dinner: "飯店豪華晚宴" 
+            },
+            { 
+                date: "3/31", day: "Day 06", weather: "☀️ 快晴 4°C / 11°C", haiku: "青い空 旅路を照らす 春の風",
+                hotel: "札幌全日空皇冠假日酒店", transport: "JR 特急北斗號", 
+                activities: [
+                    { title: "登別溫泉街散策", desc: "逛逛溫泉商店街，沿途尋找隱藏在各處的鬼怪石像，感受地獄之谷的神秘氛圍。" },
+                    { title: "返回札幌市區", desc: "帶著溫泉後的舒爽心情返回市中心，入住靠近車站的飯店以便採買。" },
+                    { title: "自由採買時間", desc: "前往札幌車站周邊的大型百貨、地下街，享受最後在北海道的購貨樂趣。" }
+                ], 
+                lunch: "溫泉街小吃", dinner: "拉麵信玄" 
+            },
+            { 
+                date: "4/01", day: "Day 07", weather: "🌧️ 雨 5°C / 9°C", haiku: "雨の午後 チョコの香りに 春を知る",
+                hotel: "札幌全日空皇冠假日酒店", transport: "地鐵 + 直達巴士", 
+                activities: [
+                    { title: "白色戀人公園", desc: "如童話般夢幻的巧克力工廠，除了購買伴手禮，也能在咖啡廳享用限定甜食。" },
+                    { title: "三井 Outlet Park", desc: "北海道最大的 Outlet 商場，在回台前做最後一輪的名牌與流行服飾補貨。" }
+                ], 
+                lunch: "Outlet 美食街", dinner: "迴轉壽司 Toriton" 
+            },
+            { 
+                date: "4/02", day: "Day 08", weather: "☀️ 晴れ 6°C / 13°C", haiku: "旅終わり 空港に吹く 春一番",
+                hotel: "無 (回程)", transport: "JR 快速 Airport 號", 
+                activities: [
+                    { title: "空港最後掃貨", desc: "新千歲空港國內線航廈是伴手禮天堂，請務必留足時間買齊最後清單。" },
+                    { title: "賦歸回台", desc: "帶著滿載的行李與充實的回憶，前往國際線登機，為這段旅程畫下句點。" }
+                ], 
+                lunch: "豚丼信玄 (機場店)", dinner: "機上餐食" 
+            }
+        ];
+
+        const checklistData = [
+            { category: "重要文件", items: ["護照正本", "日幣現金 / 信用卡", "保險證明文件", "Vaundy 演唱會門票", "Visit Japan Web QR"] },
+            { category: "電子產品", items: ["行動電源", "各項充電線", "日本 SIM 卡 / WiFi 機", "相機與記憶卡"] },
+            { category: "必備衣物", items: ["防風防水外套", "發熱衣/褲", "手套/圍巾", "防滑鞋 (3月地面仍有殘冰)", "備用襪子"] },
+            { category: "個人用品", items: ["常備藥品", "保濕乳液/護唇膏", "雨具 (摺疊傘)", "摺疊購物袋"] }
+        ];
+
+        let currentView = 'day';
+        let currentDayIdx = 0;
+        let expandedActivityIdx = null; 
+        let storage = {
+            completed: JSON.parse(localStorage.getItem('hokkaido_tasks') || '{}'),
+            budget: JSON.parse(localStorage.getItem('hokkaido_budget') || '{}'),
+            checklist: JSON.parse(localStorage.getItem('hokkaido_checklist_status') || '{}')
+        };
+
+        function init() {
+            renderDayButtons();
+            renderContent();
+            calculateGlobalStats();
+        }
+
+        function renderDayButtons() {
+            const container = document.getElementById('day-buttons-container');
+            container.innerHTML = itinerary.map((d, i) => `
+                <button onclick="switchView('day', ${i})" id="btn-day-${i}" 
+                    class="day-btn flex-shrink-0 w-12 h-12 rounded-2xl bg-white/50 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm">
+                    <span class="text-[8px] font-black text-slate-300 uppercase">${d.day.split(' ')[1]}</span>
+                    <span class="text-sm font-black text-slate-700 leading-none">${d.date.split('/')[1]}</span>
+                </button>
+            `).join('');
+            updateActiveState();
+        }
+
+        function switchView(view, idx = 0) {
+            currentView = view;
+            if (view === 'day') {
+                currentDayIdx = idx;
+                expandedActivityIdx = null; 
+            }
+            updateActiveState();
+            renderContent();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateActiveState() {
+            document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('day-active'));
+            if (currentView === 'checklist') {
+                document.getElementById('btn-checklist').classList.add('day-active');
+            } else if (document.getElementById(`btn-day-${currentDayIdx}`)) {
+                document.getElementById(`btn-day-${currentDayIdx}`).classList.add('day-active');
+            }
+        }
+
+        function renderContent() {
+            if (currentView === 'checklist') renderChecklist();
+            else renderDay();
+        }
+
+        function toggleActivity(idx) {
+            expandedActivityIdx = expandedActivityIdx === idx ? null : idx;
+            renderDay();
+        }
+
+        function toggleTask(e, taskIdx) {
+            e.stopPropagation(); 
+            const key = `d${currentDayIdx}-t${taskIdx}`;
+            storage.completed[key] = !storage.completed[key];
+            localStorage.setItem('hokkaido_tasks', JSON.stringify(storage.completed));
+            renderDay();
+            calculateGlobalStats();
+        }
+
+        function renderDay() {
+            const d = itinerary[currentDayIdx];
+            const content = document.getElementById('content-area');
+            const dailyBudget = storage.budget[currentDayIdx] || "";
+            document.getElementById('bottom-label').innerText = "Today's Total";
+            document.getElementById('bottom-value').innerText = `¥ ${(dailyBudget || 0).toLocaleString()}`;
+
+            content.innerHTML = `
+                <div class="animate-up">
+                    <!-- Weather Card (Minimal Style) -->
+                    <div class="glass-card rounded-[32px] p-8 mb-8 relative overflow-hidden">
+                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-sky-400/10 rounded-full blur-[80px]"></div>
+                        <div class="relative z-10">
+                            <p class="text-[9px] font-black text-sky-500 uppercase tracking-[0.3em] mb-2">Weather & Poem</p>
+                            <h2 class="text-4xl font-black text-slate-800 tracking-tighter">${d.weather}</h2>
+                            <div class="mt-6 flex items-start space-x-3">
+                                <div class="w-1 h-6 bg-sky-200 rounded-full"></div>
+                                <p class="text-slate-500 font-medium text-sm italic leading-relaxed opacity-80">${d.haiku}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activities (Accordion) -->
+                    <section class="mb-10">
+                        <h3 class="text-xs font-black text-slate-300 uppercase tracking-[0.3em] mb-6 pl-2">Daily Itinerary</h3>
+                        <div class="space-y-4">
+                            ${d.activities.map((act, i) => {
+                                const isChecked = storage.completed[`d${currentDayIdx}-t${i}`];
+                                const isExpanded = expandedActivityIdx === i;
+                                return `
+                                    <div class="glass-card rounded-[28px] overflow-hidden transition-all duration-500 ${isExpanded ? 'ring-1 ring-sky-500/20' : ''} ${isChecked ? 'checked-item' : ''}">
+                                        <div onclick="toggleActivity(${i})" class="p-6 flex items-center cursor-pointer active:bg-white/40">
+                                            <div onclick="toggleTask(event, ${i})" class="w-6 h-6 rounded-full border-2 ${isChecked ? 'bg-slate-800 border-slate-800 shadow-lg shadow-slate-200' : 'border-slate-200'} flex items-center justify-center mr-4 transition-all">
+                                                ${isChecked ? '<i class="fas fa-check text-white text-[9px]"></i>' : ''}
+                                            </div>
+                                            <span class="flex-1 text-sm font-bold text-slate-800 tracking-tight">${act.title}</span>
+                                            <i class="fas fa-plus text-[10px] text-slate-300 transition-transform duration-500 ${isExpanded ? 'rotate-45' : ''}"></i>
+                                        </div>
+                                        <div class="${isExpanded ? 'content-expanded' : 'content-collapsed'}">
+                                            <div class="px-6 pb-6">
+                                                <div class="p-5 bg-white/50 rounded-2xl border border-white/80">
+                                                    <p class="text-xs text-slate-500 leading-relaxed mb-5">${act.desc}</p>
+                                                    <button onclick="openMap('${act.title}')" class="w-full bg-white text-slate-800 py-3 rounded-xl text-[10px] font-black tracking-widest uppercase border border-slate-100 flex items-center justify-center shadow-sm active:scale-95 transition-all">
+                                                        <i class="fas fa-location-arrow mr-2 text-sky-500"></i> Open Maps
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </section>
+
+                    <!-- Logistics Grid -->
+                    <div class="grid grid-cols-2 gap-4 mb-10">
+                        <div class="glass-card p-6 rounded-[32px]">
+                            <div class="text-indigo-400 mb-2"><i class="fas fa-hotel"></i></div>
+                            <p class="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-1">Hotel</p>
+                            <p class="text-xs font-bold text-slate-800 leading-tight">${d.hotel}</p>
+                        </div>
+                        <div class="glass-card p-6 rounded-[32px]">
+                            <div class="text-amber-400 mb-2"><i class="fas fa-train"></i></div>
+                            <p class="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-1">Transit</p>
+                            <p class="text-xs font-bold text-slate-800 leading-tight">${d.transport}</p>
+                        </div>
+                    </div>
+
+                    <!-- Dining -->
+                    <section class="glass-card rounded-[32px] p-6 mb-10">
+                        <h3 class="text-xs font-black text-slate-300 uppercase tracking-[0.3em] mb-6">Food Finder</h3>
+                        <div class="space-y-3">
+                            <div onclick="openMap('${d.lunch}')" class="flex items-center justify-between p-4 bg-white/50 rounded-2xl cursor-pointer hover:bg-sky-50 transition-all border border-white">
+                                <span class="text-[9px] font-black text-sky-600/50 uppercase tracking-widest">Lunch</span>
+                                <span class="text-sm font-bold text-slate-800">${d.lunch} <i class="fas fa-external-link-alt ml-2 text-[9px] opacity-20"></i></span>
+                            </div>
+                            <div onclick="openMap('${d.dinner}')" class="flex items-center justify-between p-4 bg-white/50 rounded-2xl cursor-pointer hover:bg-sky-50 transition-all border border-white">
+                                <span class="text-[9px] font-black text-sky-600/50 uppercase tracking-widest">Dinner</span>
+                                <span class="text-sm font-bold text-slate-800">${d.dinner} <i class="fas fa-external-link-alt ml-2 text-[9px] opacity-20"></i></span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Budget Input -->
+                    <section class="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 mb-12">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Expense Logger</h3>
+                            <i class="fas fa-circle-dollar-to-slot text-slate-200"></i>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-light text-slate-300 italic font-montserrat">¥</span>
+                            <input type="number" value="${dailyBudget}" oninput="updateBudget(this.value)" 
+                                placeholder="0" 
+                                class="w-full bg-transparent border-b border-slate-100 py-4 pl-8 text-4xl font-montserrat font-black text-slate-800 focus:border-sky-500 outline-none transition-all placeholder:text-slate-100">
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+
+        function renderChecklist() {
+            const content = document.getElementById('content-area');
+            document.getElementById('bottom-label').innerText = "Progress";
+            let total = 0, done = 0;
+            checklistData.forEach((cat, cIdx) => {
+                cat.items.forEach((_, iIdx) => {
+                    total++;
+                    if(storage.checklist[`c${cIdx}-i${iIdx}`]) done++;
+                });
+            });
+            const progress = Math.round((done / total) * 100);
+            document.getElementById('bottom-value').innerText = `${progress}% Ready`;
+
+            content.innerHTML = `
+                <div class="animate-up">
+                    <div class="mb-12 text-center">
+                        <p class="text-sky-500 font-black text-[10px] tracking-[0.4em] uppercase mb-4">Preparation</p>
+                        <h2 class="text-4xl font-black text-slate-800 tracking-tight">行前清單</h2>
+                    </div>
+                    ${checklistData.map((cat, cIdx) => `
+                        <section class="mb-10">
+                            <h3 class="text-slate-400 font-black text-xs uppercase tracking-widest mb-6 border-l-2 border-sky-400 pl-4">${cat.category}</h3>
+                            <div class="grid grid-cols-1 gap-3">
+                                ${cat.items.map((item, iIdx) => {
+                                    const isChecked = storage.checklist[`c${cIdx}-i${iIdx}`];
+                                    return `
+                                        <div onclick="toggleChecklist(${cIdx}, ${iIdx})" class="glass-card p-5 rounded-[24px] flex items-center cursor-pointer active:scale-[0.98] transition-all">
+                                            <div class="w-6 h-6 rounded-full border-2 ${isChecked ? 'bg-slate-800 border-slate-800 shadow-lg' : 'border-slate-100'} flex items-center justify-center mr-4 transition-all">
+                                                ${isChecked ? '<i class="fas fa-check text-white text-[9px]"></i>' : ''}
+                                            </div>
+                                            <span class="text-sm font-bold ${isChecked ? 'checked-item' : 'text-slate-700'}">${item}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </section>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function toggleChecklist(catIdx, itemIdx) {
+            const key = `c${catIdx}-i${itemIdx}`;
+            storage.checklist[key] = !storage.checklist[key];
+            localStorage.setItem('hokkaido_checklist_status', JSON.stringify(storage.checklist));
+            renderChecklist();
+        }
+
+        function updateBudget(val) {
+            storage.budget[currentDayIdx] = parseInt(val) || 0;
+            localStorage.setItem('hokkaido_budget', JSON.stringify(storage.budget));
+            calculateGlobalStats();
+            document.getElementById('bottom-value').innerText = `¥ ${storage.budget[currentDayIdx].toLocaleString()}`;
+        }
+
+        function calculateGlobalStats() {
+            let totalTasks = 0, doneTasks = 0;
+            itinerary.forEach((d, dIdx) => {
+                d.activities.forEach((_, tIdx) => {
+                    totalTasks++;
+                    if(storage.completed[`d${dIdx}-t${tIdx}`]) doneTasks++;
+                });
+            });
+            const progress = (doneTasks / totalTasks) * 100;
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) progressBar.style.width = `${progress}%`;
+            
+            let totalSpend = 0;
+            Object.values(storage.budget).forEach(v => totalSpend += v);
+            const totalBudgetElem = document.getElementById('total-budget');
+            if (totalBudgetElem) totalBudgetElem.innerText = `¥ ${totalSpend.toLocaleString()}`;
+        }
+
+        function openMap(query) {
+            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+        }
+
+        function shareItinerary() {
+            alert("已為您產生行程清單連結，隨時可與同行好友分享！");
+        }
+
+        init();
+    </script>
+</body>
+</html>
