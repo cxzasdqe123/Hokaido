@@ -85,8 +85,8 @@
             transition: opacity 0.3s;
         }
         @media (prefers-color-scheme: dark) {
-            .scroller-mask-left { background: linear-gradient(to right, #1a243a, transparent); }
-            .scroller-mask-right { background: linear-gradient(to left, #1a243a, transparent); }
+            .scroller-mask-left { background: linear-gradient(to right, #0f172a, transparent); }
+            .scroller-mask-right { background: linear-gradient(to left, #0f172a, transparent); }
         }
 
         /* 毛玻璃組件 */
@@ -96,20 +96,33 @@
             -webkit-backdrop-filter: blur(25px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Header 收縮動畫 */
+        /* Header 收縮優化動畫 */
+        header.shrunk {
+            padding: 0;
+        }
+        header.shrunk .glass-card {
+            margin: 0;
+            border-radius: 0 0 24px 24px;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
         header.shrunk .header-info {
             max-height: 0;
             padding-top: 0;
             padding-bottom: 0;
             opacity: 0;
-            margin-bottom: -10px;
+            transform: translateY(-20px);
+            pointer-events: none;
         }
-        header.shrunk .glass-card {
-            border-radius: 24px;
-            margin-top: 0;
+        .header-info {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 200px;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -146,10 +159,10 @@
 <body class="pb-36">
 
     <!-- Header -->
-    <header id="main-header" class="sticky top-0 z-50 p-4 transition-all duration-300">
+    <header id="main-header" class="sticky top-0 z-50 p-4 transition-all duration-500">
         <div class="glass-card rounded-[32px] overflow-hidden">
             <!-- 可收縮資訊區 -->
-            <div class="header-info px-6 py-6 flex justify-between items-start transition-all duration-300 overflow-hidden">
+            <div class="header-info px-6 py-6 flex justify-between items-start overflow-hidden">
                 <div>
                     <div class="flex items-center space-x-2 mb-1">
                         <i class="fas fa-mountain-sun text-sky-500 text-xs"></i>
@@ -260,7 +273,7 @@
                 date: "3/29", day: "Day 04", weather_jp: "雪", temp: "0°C / 5°C", haiku: "小樽路や 運河に舞いし 春の雪",
                 hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 (往返)", 
                 activities: [
-                    { title: "小樽甜點街", desc: "漫步堺町通，六花亭、北菓樓名店林立，是購買精緻甜食與手工玻璃工藝的首選。" },
+                    { title: "小樽甜點街", desc: "漫步堺町通，六花亭、北菓樓名店林立，是購買精緻甜食的首選。" },
                     { title: "籔半蕎麥麵", desc: "在充滿歷史情懷的石磨麵屋中，品嚐手工蕎麥麵的獨特香氣。" },
                     { title: "山中牧場冰淇淋", desc: "牧場直送的極致美味！純粹無添加的奶香是小樽必嚐療癒甜點。" },
                     { title: "小樽運河夜景", desc: "石造倉庫群與瓦斯燈倒映在靜謐的水面，呈現極致的浪漫懷舊感。" }
@@ -332,7 +345,6 @@
         };
 
         function init() {
-            // 自動偵測日期
             detectCurrentDay();
             renderDayButtons();
             renderContent();
@@ -342,11 +354,8 @@
 
         function detectCurrentDay() {
             const now = new Date();
-            const year = now.getFullYear();
             const month = now.getMonth() + 1;
             const date = now.getDate();
-
-            // 僅在 2025 年或開發測試時自動鎖定 (這裡為了實用性，不檢查年份)
             const datesMap = {
                 "3-26": 0, "3-27": 1, "3-28": 2, "3-29": 3,
                 "3-30": 4, "3-31": 5, "4-1": 6, "4-2": 7
@@ -362,26 +371,30 @@
             const maskL = document.getElementById('mask-l');
             const maskR = document.getElementById('mask-r');
 
-            scroller.addEventListener('scroll', () => {
+            const updateMasks = () => {
                 const scrollLeft = scroller.scrollLeft;
                 const maxScroll = scroller.scrollWidth - scroller.clientWidth;
                 maskL.style.opacity = scrollLeft > 10 ? "1" : "0";
                 maskR.style.opacity = scrollLeft < maxScroll - 10 ? "1" : "0";
-            });
+            };
 
-            // 初始化時偵測一次
+            scroller.addEventListener('scroll', updateMasks);
+            window.addEventListener('resize', updateMasks);
+            
             setTimeout(() => {
                 const activeBtn = document.getElementById(`btn-day-${currentDayIdx}`);
                 if (activeBtn) {
                     activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                 }
+                updateMasks();
             }, 500);
         }
 
-        // Header 收縮監聽
+        // 優化後的 Header 收縮監聽
         window.addEventListener('scroll', () => {
             const header = document.getElementById('main-header');
-            if (window.scrollY > 50) {
+            // 當滾動超過 20 像素就收縮，小於 10 像素（接近頂部）就立即還原
+            if (window.scrollY > 20) {
                 header.classList.add('shrunk');
             } else {
                 header.classList.remove('shrunk');
@@ -616,7 +629,7 @@
             storage.budget[currentDayIdx] = parseInt(val) || 0;
             localStorage.setItem('hokkaido_budget', JSON.stringify(storage.budget));
             calculateGlobalStats();
-            renderDay(); // 即時更新 TWD 顯示
+            renderDay(); 
         }
 
         function calculateGlobalStats() {
