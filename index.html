@@ -78,15 +78,6 @@
         }
         .animate-header-info { animation: fadeInSlide 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
-        /* 預算閃爍提醒 */
-        .budget-update {
-            animation: pulse-glow 1.5s ease-in-out;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { border-color: rgba(255, 255, 255, 0.6); }
-            50% { border-color: var(--hk-sky); box-shadow: 0 0 15px rgba(14, 165, 233, 0.3); }
-        }
-
         .day-active {
             background: var(--hk-deep) !important; 
             color: #ffffff !important;
@@ -141,7 +132,7 @@
         .checked-item { opacity: 0.4; filter: grayscale(0.8); }
 
         .content-collapsed { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .content-expanded { max-height: 1000px; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .content-expanded { max-height: 1200px; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 
         .animate-up { animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -167,48 +158,34 @@
         }
     </style>
 </head>
-<body class="pb-36">
+<body class="pb-12">
 
     <!-- 視差背景層 -->
     <div id="bg-layer-1" class="parallax-bg"><div class="bg-glow-1"></div></div>
     <div id="bg-layer-2" class="parallax-bg"><div class="bg-glow-2"></div></div>
 
     <!-- 頂部資訊區 (優化版 Header) -->
-    <header id="info-header" class="px-6 pt-12 pb-8 flex justify-between items-end transition-all duration-500 will-change-transform">
+    <header id="info-header" class="px-6 pt-12 pb-8 flex flex-col transition-all duration-500 will-change-transform">
         <div class="animate-header-info">
-            <div class="flex items-center space-x-3 mb-2">
-                <span class="px-2 py-0.5 bg-sky-500 text-[9px] font-black text-white rounded-full uppercase tracking-tighter animate-pulse">Live</span>
-                <div class="h-[1px] w-8 bg-sky-300 opacity-50"></div>
-                <h1 class="text-[10px] font-montserrat font-black text-sky-600 tracking-[0.5em] uppercase">Memories</h1>
+            <div class="flex items-center space-x-3 mb-3">
+                <span class="px-2.5 py-1 bg-sky-500 text-[10px] font-black text-white rounded-full uppercase tracking-tighter animate-pulse">Live</span>
+                <div class="h-[1px] w-10 bg-sky-300 opacity-50"></div>
+                <h1 class="text-[12px] font-montserrat font-black text-sky-600 tracking-[0.5em] uppercase">Memories</h1>
             </div>
             <div class="flex flex-col">
                 <div class="flex flex-col items-baseline">
-                    <span class="text-3xl font-montserrat font-black text-slate-800 tracking-tight leading-none">HOKKAIDO</span>
-                    <div class="flex items-center space-x-2 mt-2">
-                        <span class="text-lg font-light text-slate-300">/</span>
-                        <span class="text-sm font-bold text-slate-500 tracking-[0.2em] uppercase">The Spring Project</span>
+                    <span class="text-4xl font-montserrat font-black text-slate-800 tracking-tight leading-none uppercase">Hokkaido</span>
+                    <div class="flex items-center space-x-2 mt-3">
+                        <span class="text-xl font-light text-slate-300">/</span>
+                        <span class="text-base font-bold text-slate-500 tracking-[0.2em] uppercase">The Spring Project</span>
                     </div>
                 </div>
-                <p class="text-[9px] font-bold text-slate-400 mt-3 flex items-center">
-                    <i class="fa-solid fa-calendar-day mr-1.5 text-sky-400"></i> 
+                <p class="text-[11px] font-bold text-slate-400 mt-4 flex items-center tracking-wide">
+                    <i class="fa-solid fa-calendar-day mr-2 text-sky-400"></i> 
                     MAR 26 - APR 02, 2025 
-                    <span class="mx-2 opacity-30">|</span> 
+                    <span class="mx-3 opacity-30">|</span> 
                     8 DAYS
                 </p>
-            </div>
-        </div>
-
-        <!-- 預算 Widget -->
-        <div id="budget-card" class="glass-card rounded-[24px] p-4 border border-white/60 text-right shadow-xl min-w-[120px] relative overflow-hidden group hover:scale-105 transition-transform duration-300">
-            <div class="absolute -right-4 -top-4 w-12 h-12 bg-sky-400/10 rounded-full blur-xl group-hover:bg-sky-400/20 transition-colors"></div>
-            
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1 flex items-center justify-end">
-                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2 animate-pulse"></span>
-                Total Est.
-            </p>
-            <div class="flex flex-col items-end">
-                <div id="total-budget" class="text-2xl font-montserrat font-black text-slate-800 leading-none tracking-tighter">¥ 0</div>
-                <div id="total-budget-twd" class="text-[10px] font-bold text-sky-600/80 mt-1.5 py-0.5 px-2 bg-sky-50 dark:bg-sky-900/30 rounded-lg">≈ NT$ 0</div>
             </div>
         </div>
     </header>
@@ -216,49 +193,45 @@
     <!-- 原生 Sticky 導航條 -->
     <div id="sticky-nav" class="sticky-nav-wrapper">
         <div class="glass-card mx-4 rounded-3xl overflow-hidden border-white/40 shadow-xl">
-            <div class="scroller-container px-4 py-3">
+            <div class="scroller-container px-4 py-3.5">
                 <div class="scroller-mask-left" id="mask-l"></div>
                 <div class="scroller-mask-right" id="mask-r"></div>
                 
                 <div id="arrow-hint-l" class="absolute left-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none">
-                    <i class="fas fa-chevron-left text-[10px]"></i>
+                    <i class="fas fa-chevron-left text-[11px]"></i>
                 </div>
                 <div id="arrow-hint-r" class="absolute right-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none">
-                    <i class="fas fa-chevron-right text-[10px]"></i>
+                    <i class="fas fa-chevron-right text-[11px]"></i>
                 </div>
 
-                <div id="date-scroll-box" class="flex overflow-x-auto no-scrollbar py-1 space-x-2 items-center flex-nowrap scroll-smooth">
+                <div id="date-scroll-box" class="flex overflow-x-auto no-scrollbar py-1 space-x-3 items-center flex-nowrap scroll-smooth">
                     <button onclick="switchView('checklist')" id="btn-checklist" 
-                        class="day-btn flex-shrink-0 w-11 h-11 rounded-xl bg-white/50 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm backdrop-blur-md">
-                        <i class="fas fa-clipboard-check text-slate-400 text-base"></i>
+                        class="day-btn flex-shrink-0 w-12 h-12 rounded-xl bg-white/50 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm backdrop-blur-md">
+                        <i class="fas fa-clipboard-check text-slate-500 text-lg"></i>
                     </button>
-                    <div id="day-buttons-container" class="flex flex-nowrap space-x-2"></div>
+                    <div id="day-buttons-container" class="flex flex-nowrap space-x-3"></div>
                 </div>
-            </div>
-            <!-- Progress -->
-            <div class="w-full bg-slate-200/30 h-[2.5px]">
-                <div id="progress-bar" class="bg-sky-600 h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
             </div>
         </div>
     </div>
 
     <!-- 主要內容區 -->
-    <main id="content-area" class="px-6 py-6 max-w-lg mx-auto space-y-10"></main>
+    <main id="content-area" class="px-6 py-6 max-w-lg mx-auto space-y-12"></main>
 
-    <!-- 地鐵助手懸浮按鈕 & 視窗 -->
-    <div class="fixed bottom-28 right-6 z-[60]">
-        <div id="subway-panel" class="glass-card absolute bottom-16 right-0 w-64 rounded-3xl p-5 shadow-2xl border-white/80">
-            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center">
+    <!-- 地鐵助手 (保留此功能以利交通) -->
+    <div class="fixed bottom-10 right-6 z-[60]">
+        <div id="subway-panel" class="glass-card absolute bottom-18 right-0 w-64 rounded-3xl p-6 shadow-2xl border-white/80">
+            <h4 class="text-[13px] font-black text-slate-400 uppercase tracking-widest mb-5 flex items-center">
                 <i class="fas fa-map-location-dot mr-2 text-sky-500"></i> 地鐵助手
             </h4>
-            <div class="space-y-2">
-                <button onclick="openSubwayMap()" class="w-full bg-white/60 py-3 rounded-2xl text-[11px] font-bold text-slate-700 flex items-center justify-center hover:bg-white transition-all shadow-sm">
-                    <i class="fas fa-map mr-2 text-sky-500"></i> 查看全線路線圖
+            <div class="space-y-3">
+                <button onclick="openSubwayMap()" class="w-full bg-white/60 py-4 rounded-2xl text-[12px] font-bold text-slate-700 flex items-center justify-center hover:bg-white transition-all shadow-sm">
+                    <i class="fas fa-map mr-2 text-sky-500 text-sm"></i> 查看全線路線圖
                 </button>
-                <button onclick="findNearestStation()" class="w-full bg-sky-600 text-white py-3 rounded-2xl text-[11px] font-bold flex items-center justify-center hover:bg-sky-700 transition-all shadow-lg">
-                    <i class="fas fa-location-crosshairs mr-2"></i> 尋找最近車站
+                <button onclick="findNearestStation()" class="w-full bg-sky-600 text-white py-4 rounded-2xl text-[12px] font-bold flex items-center justify-center hover:bg-sky-700 transition-all shadow-lg">
+                    <i class="fas fa-location-crosshairs mr-2 text-sm"></i> 尋找最近車站
                 </button>
-                <div id="nearest-info" class="text-[10px] text-slate-400 text-center mt-2 font-medium italic hidden">
+                <div id="nearest-info" class="text-[11px] text-slate-400 text-center mt-3 font-medium italic hidden">
                     正在定位中...
                 </div>
             </div>
@@ -271,32 +244,13 @@
     <!-- 全螢幕圖片查看器 Modal -->
     <div id="map-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
         <button onclick="closeSubwayMap()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-all">
-            <i class="fas fa-xmark text-xl"></i>
+            <i class="fas fa-xmark text-2xl"></i>
         </button>
         <div class="max-w-5xl w-full max-h-[85vh] overflow-auto rounded-2xl shadow-2xl bg-white p-2">
             <img src="subwayrosenzu.jpg" alt="北海道地鐵全線圖" class="w-full h-auto block rounded-xl">
         </div>
-        <p class="absolute bottom-6 text-white/50 text-[10px] font-bold uppercase tracking-widest">點擊外部或按鈕以關閉</p>
+        <p class="absolute bottom-6 text-white/50 text-[11px] font-bold uppercase tracking-widest">點擊外部或按鈕以關閉</p>
     </div>
-
-    <!-- 底部導覽 -->
-    <nav class="fixed bottom-6 left-6 right-6 z-50">
-        <div class="glass-card rounded-[32px] p-4 flex justify-between items-center shadow-2xl">
-            <div class="pl-2">
-                <p id="bottom-label" class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Today's Cost</p>
-                <p id="bottom-value" class="text-xl font-black text-slate-800 leading-tight">¥ 0</p>
-                <p id="bottom-value-twd" class="text-[9px] font-bold text-sky-600 opacity-70 leading-none">≈ NT$ 0</p>
-            </div>
-            <div class="flex space-x-2">
-                <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="w-12 h-12 flex items-center justify-center text-slate-400 hover:text-sky-500 transition-colors">
-                    <i class="fas fa-circle-chevron-up text-xl"></i>
-                </button>
-                <button onclick="shareItinerary()" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-8 h-12 rounded-[20px] text-[10px] font-black tracking-[0.2em] uppercase shadow-lg active:scale-95 transition-all">
-                    Share
-                </button>
-            </div>
-        </div>
-    </nav>
 
     <script>
         const JPY_TO_TWD = 0.21;
@@ -340,13 +294,13 @@
                     { title: "自由採買時間", desc: "前往札幌車站周邊百貨與地下街，享受購貨樂趣。" }
                 ], lunch: "溫泉街小吃", dinner: "拉麵信玄" },
             { date: "4/01", day: "Day 07", weather_jp: "雨", temp: "5°C / 9°C", haiku: "雨の午後 チョコの香りに 春を知る", hotel: "札幌全日空皇冠假日酒店", transport: "地鐵 + 直達巴士", activities: [{ title: "白色戀人公園", desc: "巧克力工廠享用限定甜點。" }, { title: "三井 Outlet Park 北廣島", desc: "精選日系與運動戶外名店，做最後採買。", extraLink: { label: "Floor Map (PDF)", url: "https://mitsui-shopping-park.com/mop/file/filter/sapporo/floor/00009_fo.pdf", icon: "fa-map-location-dot" } }], lunch: "Outlet 美食街", dinner: "迴轉壽司 Toriton" },
-            { date: "4/02", day: "Day 08", weather_jp: "晴れ", temp: "6°C / 13°C", haiku: "旅終わり 空港に吹く 春一番", hotel: "無 (回程)", transport: "JR 快速 Airport 號", activities: [{ title: "空港最後掃貨", desc: "新千歲空港國內線航廈是購物天堂。" }, { title: "賦歸回台", desc: "帶著滿載的行李登機，結束完美旅程。" }], lunch: "豚丼信玄 (機場店)", dinner: "機上餐食" }
+            { date: "4/02", day: "Day 08", weather_jp: "晴れ", temp: "6°C / 13°C", haiku: "旅終わり 空港に吹く 春一番", hotel: "無 (回程)", transport: "JR 快速 Airport 號", activities: [{ title: "空港最後掃貨", desc: "新千歲空港國內線航廈是購物天堂。" }, { title: "賦歸回台", desc: "帶著滿載的行李進攻登機，結束完美旅程。" }], lunch: "豚丼信玄 (機場店)", dinner: "機上餐食" }
         ];
 
         const checklistData = [
             { category: "重要文件", items: ["護照正本", "日幣/信用卡", "保險文件", "演唱會門票", "VJW"] },
             { category: "電子產品", items: ["行動電源", "充電線", "SIM卡", "相機"] },
-            { category: "必備衣物", items: ["外套", "發熱衣", "手套圍巾", "防滑鞋"] },
+            { category: "必備衣物", items: ["外套", "發熱衣褲", "手套圍巾", "防滑鞋"] },
             { category: "個人用品", items: ["常備藥", "保濕", "雨具", "購物袋"] }
         ];
 
@@ -356,17 +310,10 @@
         let lastKnownScrollPosition = 0;
         let ticking = false;
 
-        let storage = {
-            completed: JSON.parse(localStorage.getItem('hokkaido_tasks') || '{}'),
-            budget: JSON.parse(localStorage.getItem('hokkaido_budget') || '{}'),
-            checklist: JSON.parse(localStorage.getItem('hokkaido_checklist_status') || '{}')
-        };
-
         function init() {
             detectCurrentDay();
             renderDayButtons();
             renderContent();
-            calculateGlobalStats();
             setupScrollerEvents();
             setupSimplifiedScroll();
 
@@ -452,9 +399,9 @@
         function renderDayButtons() {
             const container = document.getElementById('day-buttons-container');
             container.innerHTML = itinerary.map((d, i) => `
-                <button onclick="switchView('day', ${i})" id="btn-day-${i}" class="day-btn flex-shrink-0 w-11 h-11 rounded-xl bg-white/40 border border-white flex flex-col items-center justify-center transition-all shadow-sm backdrop-blur-md">
-                    <span class="text-[7px] font-black text-slate-400 uppercase tracking-tighter">${d.day.split(' ')[1]}</span>
-                    <span class="text-xs font-black text-slate-800 leading-none">${d.date.split('/')[1]}</span>
+                <button onclick="switchView('day', ${i})" id="btn-day-${i}" class="day-btn flex-shrink-0 w-12 h-12 rounded-xl bg-white/40 border border-white flex flex-col items-center justify-center transition-all shadow-sm backdrop-blur-md">
+                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">${d.day.split(' ')[1]}</span>
+                    <span class="text-[13px] font-black text-slate-800 leading-none">${d.date.split('/')[1]}</span>
                 </button>
             `).join('');
             updateActiveState();
@@ -475,112 +422,99 @@
 
         function toggleActivity(idx) { expandedActivityIdx = expandedActivityIdx === idx ? null : idx; renderDay(); }
 
-        function toggleTask(e, tIdx) { e.stopPropagation(); const k = `d${currentDayIdx}-t${tIdx}`; storage.completed[k] = !storage.completed[k]; localStorage.setItem('hokkaido_tasks', JSON.stringify(storage.completed)); renderDay(); calculateGlobalStats(); }
+        function updateExchange(jpy) {
+            const twdResult = document.getElementById('twd-result');
+            const amount = parseFloat(jpy) || 0;
+            twdResult.innerText = `≈ NT$ ${Math.round(amount * JPY_TO_TWD).toLocaleString()}`;
+        }
 
         function renderDay() {
             const d = itinerary[currentDayIdx];
             const area = document.getElementById('content-area');
-            const daily = storage.budget[currentDayIdx] || 0;
             area.innerHTML = `
                 <div class="animate-up">
-                    <div class="glass-card rounded-[32px] p-8 mb-8 relative overflow-hidden">
-                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-sky-400/10 rounded-full blur-[80px]"></div>
-                        <div class="relative z-10 flex items-center justify-between">
-                            <div class="flex-1">
-                                <p class="text-[8px] font-black text-sky-600 uppercase tracking-[0.3em] mb-3">Weather Focus</p>
-                                <div class="flex items-center space-x-3 mb-6">
-                                    <i class="fas ${getWeatherIcon(d.weather_jp)} text-3xl"></i>
-                                    <div><h2 class="text-2xl font-black text-slate-800">${d.weather_jp}</h2><p class="text-xs font-bold text-slate-400">${d.temp}</p></div>
-                                </div>
-                                <div class="flex items-start space-x-3"><i class="fas fa-feather text-sky-300 text-[10px] mt-1"></i><p class="text-slate-500 font-medium text-xs italic leading-relaxed opacity-90">${d.haiku}</p></div>
+                    <div class="glass-card rounded-[32px] p-8 mb-10 relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em] mb-3">Weather Focus</p>
+                            <div class="flex items-center space-x-4 mb-6">
+                                <i class="fas ${getWeatherIcon(d.weather_jp)} text-4xl"></i>
+                                <div><h2 class="text-3xl font-black text-slate-800">${d.weather_jp}</h2><p class="text-sm font-bold text-slate-400 tracking-wide">${d.temp}</p></div>
                             </div>
+                            <div class="flex items-start space-x-3"><i class="fas fa-feather text-sky-300 text-[12px] mt-1.5"></i><p class="text-sm font-medium text-slate-500 italic leading-relaxed opacity-95">${d.haiku}</p></div>
                         </div>
                     </div>
-                    <section class="mb-10"><h3 class="text-xs font-black text-slate-400 uppercase mb-6 pl-2 flex items-center"><i class="fas fa-list-ul mr-2 text-sky-500"></i> Itinerary</h3><div class="space-y-4">
+                    <section class="mb-12">
+                        <h3 class="text-[11px] font-black text-slate-400 uppercase mb-6 pl-2 flex items-center tracking-widest"><i class="fas fa-list-ul mr-2 text-sky-500"></i> Itinerary</h3>
+                        <div class="space-y-4">
                         ${d.activities.map((act, i) => {
-                            const isCh = storage.completed[`d${currentDayIdx}-t${i}`], exp = expandedActivityIdx === i;
-                            return `<div class="glass-card rounded-[28px] overflow-hidden transition-all ${exp ? 'ring-1 ring-sky-500/30 shadow-lg' : ''} ${isCh ? 'checked-item' : ''}">
-                                <div onclick="toggleActivity(${i})" class="p-6 flex items-center cursor-pointer active:bg-white/50">
-                                    <div onclick="toggleTask(event, ${i})" class="w-6 h-6 rounded-full border-2 ${isCh ? 'bg-slate-800 border-slate-800 dark:bg-slate-100' : 'border-white'} flex items-center justify-center mr-4 transition-all">
-                                        ${isCh ? `<i class="fas fa-check text-white dark:text-slate-900 text-[9px]"></i>` : ''}
-                                    </div>
-                                    <span class="flex-1 text-sm font-bold text-slate-800">${act.title}</span>
-                                    <i class="fas ${exp ? 'fa-minus' : 'fa-plus'} text-[9px] text-slate-300"></i>
+                            const exp = expandedActivityIdx === i;
+                            return `<div class="glass-card rounded-[28px] overflow-hidden transition-all ${exp ? 'ring-1 ring-sky-500/30 shadow-lg' : ''}">
+                                <div onclick="toggleActivity(${i})" class="p-5 flex items-center cursor-pointer active:bg-white/50">
+                                    <span class="flex-1 text-[16px] font-bold text-slate-800 tracking-tight pl-2">${act.title}</span>
+                                    <i class="fas ${exp ? 'fa-minus' : 'fa-plus'} text-[10px] text-slate-300"></i>
                                 </div>
-                                <div class="${exp ? 'content-expanded' : 'content-collapsed'}"><div class="px-6 pb-6"><div class="p-5 bg-white/30 backdrop-blur-md rounded-2xl border border-white/40"><p class="text-xs text-slate-500 leading-relaxed mb-5">${act.desc}</p>
-                                    <div class="space-y-2">
-                                        ${act.extraLink ? `<button onclick="window.open('${act.extraLink.url}', '_blank')" class="w-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase border border-white flex items-center justify-center shadow-lg"><i class="fas ${act.extraLink.icon} mr-2"></i> ${act.extraLink.label}</button>` : ''}
-                                        <button onclick="openMap('${act.mapLink || act.title}')" class="w-full bg-white/60 text-slate-800 py-3 rounded-xl text-[9px] font-black uppercase border border-white flex items-center justify-center"><i class="fas fa-location-arrow mr-2 text-sky-600"></i> View on Map</button>
+                                <div class="${exp ? 'content-expanded' : 'content-collapsed'}">
+                                    <div class="px-5 pb-5">
+                                        <div class="p-5 bg-white/30 backdrop-blur-md rounded-2xl border border-white/40">
+                                            <p class="text-[14px] text-slate-600 leading-relaxed mb-6 font-medium pt-2">${act.desc}</p>
+                                            <div class="space-y-2.5">
+                                                ${act.extraLink ? `<button onclick="window.open('${act.extraLink.url}', '_blank')" class="w-full bg-slate-900 text-white py-4 rounded-xl text-[12px] font-black tracking-widest uppercase border border-white flex items-center justify-center shadow-lg"><i class="fas ${act.extraLink.icon} mr-2 text-sm"></i> ${act.extraLink.label}</button>` : ''}
+                                                <button onclick="openMap('${act.mapLink || act.title}')" class="w-full bg-white/60 text-slate-800 py-4 rounded-xl text-[12px] font-black uppercase border border-white flex items-center justify-center"><i class="fas fa-location-arrow mr-2 text-sky-600 text-sm"></i> View on Map</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div></div></div></div>`;
+                                </div>
+                            </div>`;
                         }).join('')}
                     </div></section>
-                    <div class="grid grid-cols-2 gap-4 mb-10">
-                        <div class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center"><i class="fas fa-hotel text-sky-500 mb-3"></i><p class="text-[7px] text-slate-400 uppercase mb-1">Stay</p><p class="text-[10px] font-bold text-slate-800">${d.hotel}</p></div>
-                        <div class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center"><i class="fas fa-train-subway text-indigo-500 mb-3"></i><p class="text-[7px] text-slate-400 uppercase mb-1">Transit</p><p class="text-[10px] font-bold text-slate-800">${d.transport}</p></div>
+                    <div class="grid grid-cols-2 gap-4 mb-12">
+                        <div class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center"><i class="fas fa-hotel text-sky-500 mb-3 text-lg"></i><p class="text-[8px] text-slate-400 uppercase mb-1.5 tracking-widest">Stay</p><p class="text-[11px] font-bold text-slate-800 leading-snug">${d.hotel}</p></div>
+                        <div class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center"><i class="fas fa-train-subway text-indigo-500 mb-3 text-lg"></i><p class="text-[8px] text-slate-400 uppercase mb-1.5 tracking-widest">Transit</p><p class="text-[11px] font-bold text-slate-800 leading-snug">${d.transport}</p></div>
                     </div>
-                    <section class="glass-card rounded-[32px] p-8 mb-10"><h3 class="text-xs font-black text-slate-400 uppercase mb-6 flex items-center"><i class="fas fa-utensils mr-2 text-rose-400"></i> Dining</h3><div class="space-y-3">
-                        <div onclick="openMap('${d.lunch}')" class="flex items-center justify-between p-4 bg-white/30 rounded-2xl cursor-pointer border border-white/50"><span class="text-[8px] font-black text-sky-600 uppercase">Lunch</span><span class="text-xs font-bold text-slate-800">${d.lunch} <i class="fas fa-arrow-right-long ml-2 text-[8px] opacity-30"></i></span></div>
-                        <div onclick="openMap('${d.dinner}')" class="flex items-center justify-between p-4 bg-white/30 rounded-2xl cursor-pointer border border-white/50"><span class="text-[8px] font-black text-sky-600 uppercase">Dinner</span><span class="text-xs font-bold text-slate-800">${d.dinner} <i class="fas fa-arrow-right-long ml-2 text-[8px] opacity-30"></i></span></div>
+                    <section class="glass-card rounded-[32px] p-8 mb-12"><h3 class="text-[11px] font-black text-slate-400 uppercase mb-6 flex items-center tracking-widest"><i class="fas fa-utensils mr-2 text-rose-400"></i> Dining</h3><div class="space-y-4">
+                        <div onclick="openMap('${d.lunch}')" class="flex items-center justify-between p-5 bg-white/30 rounded-2xl cursor-pointer border border-white/50 shadow-sm"><span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">Lunch</span><span class="text-[14px] font-bold text-slate-800">${d.lunch} <i class="fas fa-arrow-right-long ml-2 text-[10px] opacity-30"></i></span></div>
+                        <div onclick="openMap('${d.dinner}')" class="flex items-center justify-between p-5 bg-white/30 rounded-2xl cursor-pointer border border-white/50 shadow-sm"><span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">Dinner</span><span class="text-[14px] font-bold text-slate-800">${d.dinner} <i class="fas fa-arrow-right-long ml-2 text-[10px] opacity-30"></i></span></div>
                     </div></section>
-                    <section class="glass-card rounded-[32px] p-8 mb-12 border-none bg-white/50">
-                        <div class="flex items-center justify-between mb-6"><h3 class="text-xs font-black text-slate-400 uppercase">Expense Logger</h3><i class="fas fa-wallet text-slate-300"></i></div>
-                        <div class="relative"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-2xl font-light text-slate-300 font-montserrat italic">¥</span><input type="number" value="${daily || ""}" oninput="updateBudget(this.value)" placeholder="0" class="w-full bg-transparent border-b border-slate-200/50 py-4 pl-8 text-4xl font-montserrat font-black text-slate-800 focus:border-sky-500 outline-none"></div>
-                        <p class="text-[10px] text-sky-600 mt-4 font-bold opacity-60">≈ NT$ ${Math.round(daily * JPY_TO_TWD).toLocaleString()}</p>
+                    
+                    <section class="glass-card rounded-[32px] p-8 mb-16 border-none bg-sky-600/10 dark:bg-sky-500/5">
+                        <div class="flex items-center justify-between mb-7">
+                            <h3 class="text-[11px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-widest">Rate Calculator</h3>
+                            <i class="fas fa-calculator text-sky-300"></i>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-light text-slate-400 font-montserrat italic">¥</span>
+                            <input type="number" oninput="updateExchange(this.value)" placeholder="輸入日幣金額" class="w-full bg-transparent border-b border-slate-200/50 py-4 pl-10 text-4xl font-montserrat font-black text-slate-800 focus:border-sky-500 outline-none placeholder:text-slate-300">
+                        </div>
+                        <div id="twd-result" class="text-2xl font-bold text-sky-600 mt-8 py-3 px-6 bg-white/50 rounded-2xl inline-block shadow-sm">≈ NT$ 0</div>
                     </section>
                 </div>
             `;
-            document.getElementById('bottom-value').innerText = `¥ ${daily.toLocaleString()}`;
-            document.getElementById('bottom-value-twd').innerText = `≈ NT$ ${Math.round(daily * JPY_TO_TWD).toLocaleString()}`;
         }
 
         function renderChecklist() {
             const area = document.getElementById('content-area');
-            let tot = 0, done = 0;
-            checklistData.forEach((cat, cIdx) => cat.items.forEach((_, iIdx) => { tot++; if(storage.checklist[`c${cIdx}-i${iIdx}`]) done++; }));
             area.innerHTML = `
-                <div class="animate-up"><div class="mb-12 text-center"><i class="fas fa-suitcase-rolling text-sky-500 text-3xl mb-4"></i><p class="text-sky-600 font-black text-[10px] uppercase mb-1">Checklist</p><h2 class="text-4xl font-black text-slate-800 tracking-tight">行前清單</h2></div>
-                    ${checklistData.map((cat, cIdx) => `<section class="mb-10"><h3 class="text-slate-400 font-black text-xs uppercase mb-6 border-l-2 border-sky-400 pl-4">${cat.category}</h3><div class="grid grid-cols-1 gap-3">
+                <div class="animate-up"><div class="mb-12 text-center"><i class="fas fa-suitcase-rolling text-sky-500 text-4xl mb-5"></i><p class="text-sky-600 font-black text-[11px] uppercase tracking-widest mb-1">Checklist</p><h2 class="text-4xl font-black text-slate-800 tracking-tight">行前清單</h2></div>
+                    ${checklistData.map((cat, cIdx) => `<section class="mb-12"><h3 class="text-slate-400 font-black text-[12px] uppercase mb-7 border-l-3 border-sky-400 pl-4 tracking-widest">${cat.category}</h3><div class="grid grid-cols-1 gap-4">
                         ${cat.items.map((item, iIdx) => {
-                            const isCh = storage.checklist[`c${cIdx}-i${iIdx}`];
-                            return `<div onclick="toggleChecklist(${cIdx}, ${iIdx})" class="glass-card p-5 rounded-[24px] flex items-center cursor-pointer active:scale-[0.98] transition-all"><div class="w-6 h-6 rounded-full border-2 ${isCh ? 'bg-slate-800 border-slate-800 shadow-lg' : 'border-white'} flex items-center justify-center mr-4">
-                                ${isCh ? `<i class="fas fa-check text-white text-[9px]"></i>` : ''}
-                            </div><span class="text-sm font-bold ${isCh ? 'checked-item' : 'text-slate-700'}">${item}</span></div>`;
+                            const isCh = localStorage.getItem(`c${cIdx}-i${iIdx}`) === 'true';
+                            return `<div onclick="toggleChecklist(${cIdx}, ${iIdx})" class="glass-card p-6 rounded-[28px] flex items-center cursor-pointer active:scale-[0.98] transition-all shadow-sm"><div class="w-7 h-7 rounded-full border-2 ${isCh ? 'bg-slate-800 border-slate-800 shadow-lg' : 'border-white'} flex items-center justify-center mr-5">
+                                ${isCh ? `<i class="fas fa-check text-white dark:text-slate-900 text-[10px]"></i>` : ''}
+                            </div><span class="text-[16px] font-bold ${isCh ? 'opacity-40 line-through' : 'text-slate-700'}">${item}</span></div>`;
                         }).join('')}
                     </div></section>`).join('')}
                 </div>
             `;
-            document.getElementById('bottom-label').innerText = "Overall Status";
-            document.getElementById('bottom-value').innerText = `${Math.round((done / tot) * 100)}% Prepared`;
-            document.getElementById('bottom-value-twd').innerText = "";
         }
 
-        function toggleChecklist(cIdx, iIdx) { const k = `c${cIdx}-i${iIdx}`; storage.checklist[k] = !storage.checklist[k]; localStorage.setItem('hokkaido_checklist_status', JSON.stringify(storage.checklist)); renderChecklist(); }
-        
-        function updateBudget(v) { 
-            storage.budget[currentDayIdx] = parseInt(v) || 0; 
-            localStorage.setItem('hokkaido_budget', JSON.stringify(storage.budget)); 
-            calculateGlobalStats(); 
-            renderDay(); 
-            
-            const card = document.getElementById('budget-card');
-            if (card) {
-                card.classList.remove('budget-update');
-                void card.offsetWidth; 
-                card.classList.add('budget-update');
-            }
+        function toggleChecklist(cIdx, iIdx) { 
+            const k = `c${cIdx}-i${iIdx}`; 
+            const cur = localStorage.getItem(k) === 'true';
+            localStorage.setItem(k, !cur);
+            renderChecklist(); 
         }
 
-        function calculateGlobalStats() {
-            let totT = 0, doneT = 0, totS = 0;
-            itinerary.forEach((d, di) => d.activities.forEach((_, ti) => { totT++; if(storage.completed[`d${di}-t${ti}`]) doneT++; }));
-            Object.values(storage.budget).forEach(v => totS += v);
-            document.getElementById('progress-bar').style.width = `${(doneT / totT) * 100}%`;
-            document.getElementById('total-budget').innerText = `¥ ${totS.toLocaleString()}`;
-            document.getElementById('total-budget-twd').innerText = `≈ NT$ ${Math.round(totS * JPY_TO_TWD).toLocaleString()}`;
-        }
         function openMap(q) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`, '_blank'); }
-        function shareItinerary() { alert("已為您產生行程清單連結！"); }
 
         init();
     </script>
