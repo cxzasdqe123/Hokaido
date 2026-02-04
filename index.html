@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>北海道 8 天 7 夜旅遊手冊 - 性能優化版</title>
+    <title>北海道 8 天 7 夜旅遊手冊 - 數位門票版</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Montserrat:wght@700;900&display=swap');
         
@@ -67,7 +67,24 @@
             .text-slate-800 { color: #f1f5f9 !important; }
             .bg-white\/40 { background: rgba(15, 23, 42, 0.4) !important; }
             .bg-white\/50 { background: rgba(30, 41, 59, 0.5) !important; }
+            .bg-sky-50 { background: rgba(14, 165, 233, 0.1) !important; }
             input { color: #ffffff !important; }
+        }
+
+        /* 標題進場動畫 */
+        @keyframes fadeInSlide {
+            0% { opacity: 0; transform: translateX(-20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .animate-header-info { animation: fadeInSlide 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        /* 預算閃爍提醒 */
+        .budget-update {
+            animation: pulse-glow 1.5s ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { border-color: rgba(255, 255, 255, 0.6); }
+            50% { border-color: var(--hk-sky); box-shadow: 0 0 15px rgba(14, 165, 233, 0.3); }
         }
 
         .day-active {
@@ -156,25 +173,43 @@
     <div id="bg-layer-1" class="parallax-bg"><div class="bg-glow-1"></div></div>
     <div id="bg-layer-2" class="parallax-bg"><div class="bg-glow-2"></div></div>
 
-    <!-- 頂部資訊區 -->
-    <header id="info-header" class="px-6 pt-10 pb-6 flex justify-between items-start transition-all duration-500 will-change-transform">
-        <div>
-            <div class="flex items-center space-x-2 mb-1">
-                <i class="fas fa-mountain-sun text-sky-500 text-xs"></i>
-                <h1 class="text-[10px] font-montserrat font-black text-sky-600 tracking-[0.4em] uppercase">Hokkaido</h1>
+    <!-- 頂部資訊區 (優化版 Header) -->
+    <header id="info-header" class="px-6 pt-12 pb-8 flex justify-between items-end transition-all duration-500 will-change-transform">
+        <div class="animate-header-info">
+            <div class="flex items-center space-x-3 mb-2">
+                <span class="px-2 py-0.5 bg-sky-500 text-[9px] font-black text-white rounded-full uppercase tracking-tighter animate-pulse">Live</span>
+                <div class="h-[1px] w-8 bg-sky-300 opacity-50"></div>
+                <h1 class="text-[10px] font-montserrat font-black text-sky-600 tracking-[0.5em] uppercase">Memories</h1>
             </div>
-            <div class="flex items-baseline space-x-1">
-                <span class="text-3xl font-black text-slate-800">2025</span>
-                <span class="text-xl font-light text-slate-300">/</span>
-                <span class="text-2xl font-bold text-slate-800">Spring</span>
+            <div class="flex flex-col">
+                <div class="flex flex-col items-baseline">
+                    <span class="text-3xl font-montserrat font-black text-slate-800 tracking-tight leading-none">HOKKAIDO</span>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <span class="text-lg font-light text-slate-300">/</span>
+                        <span class="text-sm font-bold text-slate-500 tracking-[0.2em] uppercase">The Spring Project</span>
+                    </div>
+                </div>
+                <p class="text-[9px] font-bold text-slate-400 mt-3 flex items-center">
+                    <i class="fa-solid fa-calendar-day mr-1.5 text-sky-400"></i> 
+                    MAR 26 - APR 02, 2025 
+                    <span class="mx-2 opacity-30">|</span> 
+                    8 DAYS
+                </p>
             </div>
         </div>
-        <div class="glass-card rounded-2xl p-3 border border-white/60 text-right shadow-sm">
-            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-end">
-                <i class="fas fa-coins mr-1"></i> Budget
+
+        <!-- 預算 Widget -->
+        <div id="budget-card" class="glass-card rounded-[24px] p-4 border border-white/60 text-right shadow-xl min-w-[120px] relative overflow-hidden group hover:scale-105 transition-transform duration-300">
+            <div class="absolute -right-4 -top-4 w-12 h-12 bg-sky-400/10 rounded-full blur-xl group-hover:bg-sky-400/20 transition-colors"></div>
+            
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1 flex items-center justify-end">
+                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2 animate-pulse"></span>
+                Total Est.
             </p>
-            <div id="total-budget" class="text-lg font-black text-slate-800 leading-none mt-1">¥ 0</div>
-            <div id="total-budget-twd" class="text-[9px] font-bold text-sky-600 mt-1 opacity-70">≈ NT$ 0</div>
+            <div class="flex flex-col items-end">
+                <div id="total-budget" class="text-2xl font-montserrat font-black text-slate-800 leading-none tracking-tighter">¥ 0</div>
+                <div id="total-budget-twd" class="text-[10px] font-bold text-sky-600/80 mt-1.5 py-0.5 px-2 bg-sky-50 dark:bg-sky-900/30 rounded-lg">≈ NT$ 0</div>
+            </div>
         </div>
     </header>
 
@@ -217,7 +252,6 @@
                 <i class="fas fa-map-location-dot mr-2 text-sky-500"></i> 地鐵助手
             </h4>
             <div class="space-y-2">
-                <!-- 修改為顯示圖片按鈕 -->
                 <button onclick="openSubwayMap()" class="w-full bg-white/60 py-3 rounded-2xl text-[11px] font-bold text-slate-700 flex items-center justify-center hover:bg-white transition-all shadow-sm">
                     <i class="fas fa-map mr-2 text-sky-500"></i> 查看全線路線圖
                 </button>
@@ -294,7 +328,7 @@
                     { title: "サンドイッチ工房 サンドイッチ曼", desc: "傳說級的三明治專賣店！非常推薦外帶一份到公園野餐。", mapLink: "https://maps.app.goo.gl/Bo76cAjoerBBvQPu6" },
                     { title: "圓山公園", desc: "當地人最愛的休憩場地，享受初春清新的空氣與野餐時光。" }, 
                     { title: "Vaundy 演唱會", desc: "旅程的核心時刻！在震憾的音場中感受 Vaundy 獨特的音樂世界。" }
-                ], lunch: "炸豬排 玉藤", dinner: "串鳥居酒屋" },
+                ], lunch: "炸豬排 玉藤", dinner: "串鳥居居屋" },
             { date: "3/29", day: "Day 04", weather_jp: "雪", temp: "0°C / 5°C", haiku: "小樽路や 運河に舞いし 春の雪", hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 (往返)", activities: [{ title: "小樽甜點街", desc: "漫步堺町通，購買精緻甜食的首選。" }, { title: "籔半蕎麥麵", desc: "在充滿歷史情懷的麵屋中，品嚐手工蕎麥麵的獨特香氣。" }, { title: "山中牧場冰淇淋", desc: "牧場直送的極致美味！純粹無添加的奶香是小樽必嚐療癒甜點。" }, { title: "小樽運河夜景", desc: "石造倉庫群與瓦斯燈倒映，呈現極致的浪漫懷舊感。" }], lunch: "蕎麥屋 籔半", dinner: "寶壽司" },
             { date: "3/30", day: "Day 05", weather_jp: "曇り", temp: "1°C / 7°C", haiku: "湯の煙 地獄の谷に 春霞", hotel: "登別第一瀧本館", transport: "JR 特急北斗號 + 巴士", activities: [{ title: "移動至登別", desc: "前往著名的溫泉之鄉，享受放鬆身心的絕佳站。" }, { title: "尼克斯海洋公園", desc: "融合北歐建築風格的水族館，最受歡迎的是可愛的企鵝遊行。" }, { title: "第一瀧本館溫泉", desc: "擁有24小時超大浴場，可一邊泡湯一邊眺望地獄谷風景。" }], lunch: "自理", dinner: "飯店豪華晚宴" },
             { date: "3/31", day: "Day 06", weather_jp: "快晴", temp: "4°C / 11°C", haiku: "青い空 旅路を照らす 春の風", hotel: "札幌全日空皇冠假日酒店", transport: "JR 特急北斗號", 
@@ -336,25 +370,22 @@
             setupScrollerEvents();
             setupSimplifiedScroll();
 
-            // 點擊 Modal 背景關閉
             document.getElementById('map-modal').addEventListener('click', (e) => {
                 if (e.target.id === 'map-modal') closeSubwayMap();
             });
         }
 
-        // --- 地鐵圖 Modal 控制 ---
         function openSubwayMap() {
             const modal = document.getElementById('map-modal');
             modal.classList.remove('hidden');
-            modal.classList.add('animate-fadeIn');
-            document.body.style.overflow = 'hidden'; // 鎖定背景捲動
-            toggleSubwayPanel(); // 關閉地鐵助手面板
+            document.body.style.overflow = 'hidden'; 
+            toggleSubwayPanel(); 
         }
 
         function closeSubwayMap() {
             const modal = document.getElementById('map-modal');
             modal.classList.add('hidden');
-            document.body.style.overflow = ''; // 恢復背景捲動
+            document.body.style.overflow = ''; 
         }
 
         function toggleSubwayPanel() {
@@ -453,13 +484,16 @@
             area.innerHTML = `
                 <div class="animate-up">
                     <div class="glass-card rounded-[32px] p-8 mb-8 relative overflow-hidden">
-                        <div class="relative z-10">
-                            <p class="text-[8px] font-black text-sky-600 uppercase tracking-[0.3em] mb-3">Weather Focus</p>
-                            <div class="flex items-center space-x-3 mb-6">
-                                <i class="fas ${getWeatherIcon(d.weather_jp)} text-3xl"></i>
-                                <div><h2 class="text-2xl font-black text-slate-800">${d.weather_jp}</h2><p class="text-xs font-bold text-slate-400">${d.temp}</p></div>
+                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-sky-400/10 rounded-full blur-[80px]"></div>
+                        <div class="relative z-10 flex items-center justify-between">
+                            <div class="flex-1">
+                                <p class="text-[8px] font-black text-sky-600 uppercase tracking-[0.3em] mb-3">Weather Focus</p>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <i class="fas ${getWeatherIcon(d.weather_jp)} text-3xl"></i>
+                                    <div><h2 class="text-2xl font-black text-slate-800">${d.weather_jp}</h2><p class="text-xs font-bold text-slate-400">${d.temp}</p></div>
+                                </div>
+                                <div class="flex items-start space-x-3"><i class="fas fa-feather text-sky-300 text-[10px] mt-1"></i><p class="text-slate-500 font-medium text-xs italic leading-relaxed opacity-90">${d.haiku}</p></div>
                             </div>
-                            <div class="flex items-start space-x-3"><i class="fas fa-feather text-sky-300 text-[10px] mt-1"></i><p class="text-slate-500 font-medium text-xs italic leading-relaxed opacity-90">${d.haiku}</p></div>
                         </div>
                     </div>
                     <section class="mb-10"><h3 class="text-xs font-black text-slate-400 uppercase mb-6 pl-2 flex items-center"><i class="fas fa-list-ul mr-2 text-sky-500"></i> Itinerary</h3><div class="space-y-4">
@@ -475,7 +509,7 @@
                                 </div>
                                 <div class="${exp ? 'content-expanded' : 'content-collapsed'}"><div class="px-6 pb-6"><div class="p-5 bg-white/30 backdrop-blur-md rounded-2xl border border-white/40"><p class="text-xs text-slate-500 leading-relaxed mb-5">${act.desc}</p>
                                     <div class="space-y-2">
-                                        ${act.extraLink ? `<button onclick="window.open('${act.extraLink.url}', '_blank')" class="w-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white flex items-center justify-center shadow-lg"><i class="fas ${act.extraLink.icon} mr-2"></i> ${act.extraLink.label}</button>` : ''}
+                                        ${act.extraLink ? `<button onclick="window.open('${act.extraLink.url}', '_blank')" class="w-full bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase border border-white flex items-center justify-center shadow-lg"><i class="fas ${act.extraLink.icon} mr-2"></i> ${act.extraLink.label}</button>` : ''}
                                         <button onclick="openMap('${act.mapLink || act.title}')" class="w-full bg-white/60 text-slate-800 py-3 rounded-xl text-[9px] font-black uppercase border border-white flex items-center justify-center"><i class="fas fa-location-arrow mr-2 text-sky-600"></i> View on Map</button>
                                     </div>
                                 </div></div></div></div>`;
@@ -522,7 +556,21 @@
         }
 
         function toggleChecklist(cIdx, iIdx) { const k = `c${cIdx}-i${iIdx}`; storage.checklist[k] = !storage.checklist[k]; localStorage.setItem('hokkaido_checklist_status', JSON.stringify(storage.checklist)); renderChecklist(); }
-        function updateBudget(v) { storage.budget[currentDayIdx] = parseInt(v) || 0; localStorage.setItem('hokkaido_budget', JSON.stringify(storage.budget)); calculateGlobalStats(); renderDay(); }
+        
+        function updateBudget(v) { 
+            storage.budget[currentDayIdx] = parseInt(v) || 0; 
+            localStorage.setItem('hokkaido_budget', JSON.stringify(storage.budget)); 
+            calculateGlobalStats(); 
+            renderDay(); 
+            
+            const card = document.getElementById('budget-card');
+            if (card) {
+                card.classList.remove('budget-update');
+                void card.offsetWidth; 
+                card.classList.add('budget-update');
+            }
+        }
+
         function calculateGlobalStats() {
             let totT = 0, doneT = 0, totS = 0;
             itinerary.forEach((d, di) => d.activities.forEach((_, ti) => { totT++; if(storage.completed[`d${di}-t${ti}`]) doneT++; }));
