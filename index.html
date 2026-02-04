@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>北海道 8 天 7 夜旅遊手冊 - 視差動效版</title>
+    <title>北海道 8 天 7 夜旅遊手冊 - 性能優化版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -31,7 +31,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 120%; /* 稍微多一點高度供移動 */
+            height: 120%;
             pointer-events: none;
             z-index: -1;
             will-change: transform;
@@ -58,196 +58,141 @@
             filter: blur(40px);
         }
 
-        /* 深色模式支援 */
+        /* 深色模式 */
         @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #0f172a;
-                color: #f1f5f9;
-            }
+            body { background-color: #0f172a; color: #f1f5f9; }
             .bg-glow-1 { background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%); }
             .bg-glow-2 { background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); }
-            
-            .glass-card {
-                background: rgba(30, 41, 59, 0.7) !important;
-                border-color: rgba(255, 255, 255, 0.1) !important;
-            }
+            .glass-card { background: rgba(30, 41, 59, 0.7) !important; border-color: rgba(255, 255, 255, 0.1) !important; }
             .text-slate-800 { color: #f1f5f9 !important; }
-            .text-slate-700 { color: #e2e8f0 !important; }
-            .text-slate-500 { color: #94a3b8 !important; }
             .bg-white\/40 { background: rgba(15, 23, 42, 0.4) !important; }
-            .bg-white\/60 { background: rgba(30, 41, 59, 0.6) !important; }
-            .bg-white\/30 { background: rgba(255, 255, 255, 0.05) !important; }
-            .bg-slate-900 { background: #f8fafc !important; color: #0f172a !important; }
-            .day-btn { background: rgba(30, 41, 59, 0.5) !important; border-color: rgba(255, 255, 255, 0.05) !important; }
+            .bg-white\/50 { background: rgba(30, 41, 59, 0.5) !important; }
             input { color: #ffffff !important; }
         }
 
-        /* 導航按鈕選中樣式 */
         .day-active {
             background: var(--hk-deep) !important; 
             color: #ffffff !important;
-            transform: scale(1.05) translateY(-2px);
+            transform: scale(1.05);
             box-shadow: 0 12px 24px -8px rgba(12, 74, 110, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.2) !important;
         }
 
-        .day-active span, .day-active i {
-            color: #ffffff !important;
-            opacity: 1 !important;
-        }
+        .day-active span, .day-active i { color: #ffffff !important; opacity: 1 !important; }
 
-        /* 捲軸漸層遮罩 */
+        /* 漸層遮罩 */
         .scroller-container { position: relative; }
         .scroller-mask-left {
-            position: absolute;
-            left: 0; top: 0; bottom: 0; width: 40px; z-index: 10;
-            background: linear-gradient(to right, rgba(255, 255, 255, 0.6), transparent);
-            pointer-events: none;
-            opacity: 0; transition: opacity 0.3s;
+            position: absolute; left: 0; top: 0; bottom: 0; width: 40px; z-index: 10;
+            background: linear-gradient(to right, var(--hk-bg), transparent);
+            pointer-events: none; opacity: 0; transition: opacity 0.3s;
         }
         .scroller-mask-right {
-            position: absolute;
-            right: 0; top: 0; bottom: 0; width: 40px; z-index: 10;
-            background: linear-gradient(to left, rgba(255, 255, 255, 0.6), transparent);
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        @media (prefers-color-scheme: dark) {
-            .scroller-mask-left { background: linear-gradient(to right, rgba(15, 23, 42, 0.6), transparent); }
-            .scroller-mask-right { background: linear-gradient(to left, rgba(15, 23, 42, 0.6), transparent); }
+            position: absolute; right: 0; top: 0; bottom: 0; width: 40px; z-index: 10;
+            background: linear-gradient(to left, var(--hk-bg), transparent);
+            pointer-events: none; transition: opacity 0.3s;
         }
 
-        /* 毛玻璃組件：優化渲染流暢度 */
         .glass-card {
             background: var(--hk-glass);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
-            transform: translateZ(0); 
-            will-change: transform, padding, margin, border-radius;
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateZ(0);
         }
 
-        /* Header 收縮優化動畫 */
-        header.shrunk { padding: 0 0 4px 0; }
-        header.shrunk .glass-card {
-            margin: 0;
-            border-radius: 0 0 24px 24px;
-            border-top: none;
-            border-left: none;
-            border-right: none;
+        /* 導航欄固定樣式 - 取代原本的收縮動畫 */
+        .sticky-nav-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 8px 0;
+            transition: all 0.3s ease;
         }
-        header.shrunk .header-info {
-            max-height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            opacity: 0;
-            transform: translateY(-20px) translateZ(0);
-            pointer-events: none;
-            margin-bottom: -10px;
-        }
-        .header-info {
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            max-height: 200px;
-            opacity: 1;
-            transform: translateY(0) translateZ(0);
-            will-change: opacity, transform, max-height;
+        
+        /* 當導航欄「貼住」頂部時的微調 */
+        .is-stuck {
+            background: var(--hk-glass);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05);
+            padding: 12px 0;
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .checked-item {
-            opacity: 0.4;
-            filter: grayscale(0.8);
-        }
+        .checked-item { opacity: 0.4; filter: grayscale(0.8); }
 
-        .content-collapsed {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .content-expanded {
-            max-height: 1000px;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .content-collapsed { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .content-expanded { max-height: 1000px; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .animate-up {
-            animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        .animate-up { animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .font-montserrat { font-family: 'Montserrat', sans-serif; }
     </style>
 </head>
 <body class="pb-36">
 
-    <!-- 動態視差背景層 -->
+    <!-- 視差背景層 -->
     <div id="bg-layer-1" class="parallax-bg"><div class="bg-glow-1"></div></div>
     <div id="bg-layer-2" class="parallax-bg"><div class="bg-glow-2"></div></div>
 
-    <!-- Header -->
-    <header id="main-header" class="sticky top-0 z-50 p-4 transition-all duration-500">
-        <div class="glass-card rounded-[32px] overflow-hidden">
-            <!-- 可收縮資訊區 -->
-            <div class="header-info px-6 py-6 flex justify-between items-start overflow-hidden">
-                <div>
-                    <div class="flex items-center space-x-2 mb-1">
-                        <i class="fas fa-mountain-sun text-sky-500 text-xs"></i>
-                        <h1 class="text-[10px] font-montserrat font-black text-sky-600 tracking-[0.4em] uppercase">Hokkaido</h1>
-                    </div>
-                    <div class="flex items-baseline space-x-1">
-                        <span class="text-3xl font-black text-slate-800">2025</span>
-                        <span class="text-xl font-light text-slate-300">/</span>
-                        <span class="text-2xl font-bold text-slate-800">Spring</span>
-                    </div>
-                </div>
-                <div class="bg-white/40 dark:bg-slate-800/40 rounded-2xl p-3 border border-white/60 text-right shadow-sm">
-                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-end">
-                        <i class="fas fa-coins mr-1"></i> Total Budget
-                    </p>
-                    <div id="total-budget" class="text-lg font-black text-slate-800 leading-none mt-1">¥ 0</div>
-                    <div id="total-budget-twd" class="text-[9px] font-bold text-sky-600 mt-1 opacity-70">≈ NT$ 0</div>
-                </div>
+    <!-- 頂部資訊區 (隨捲動自然消失) -->
+    <header id="info-header" class="px-6 pt-10 pb-6 flex justify-between items-start transition-all duration-500 will-change-transform">
+        <div>
+            <div class="flex items-center space-x-2 mb-1">
+                <i class="fas fa-mountain-sun text-sky-500 text-xs"></i>
+                <h1 class="text-[10px] font-montserrat font-black text-sky-600 tracking-[0.4em] uppercase">Hokkaido</h1>
             </div>
+            <div class="flex items-baseline space-x-1">
+                <span class="text-3xl font-black text-slate-800">2025</span>
+                <span class="text-xl font-light text-slate-300">/</span>
+                <span class="text-2xl font-bold text-slate-800">Spring</span>
+            </div>
+        </div>
+        <div class="glass-card rounded-2xl p-3 border border-white/60 text-right shadow-sm">
+            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-end">
+                <i class="fas fa-coins mr-1"></i> Budget
+            </p>
+            <div id="total-budget" class="text-lg font-black text-slate-800 leading-none mt-1">¥ 0</div>
+            <div id="total-budget-twd" class="text-[9px] font-bold text-sky-600 mt-1 opacity-70">≈ NT$ 0</div>
+        </div>
+    </header>
 
-            <!-- Date Scroller -->
-            <div class="scroller-container px-4 pb-4">
+    <!-- 原生 Sticky 導航條 (取代舊的收縮 Header) -->
+    <div id="sticky-nav" class="sticky-nav-wrapper">
+        <div class="glass-card mx-4 rounded-3xl overflow-hidden">
+            <div class="scroller-container px-4 py-3">
                 <div class="scroller-mask-left" id="mask-l"></div>
                 <div class="scroller-mask-right" id="mask-r"></div>
                 
                 <div id="arrow-hint-l" class="absolute left-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none">
                     <i class="fas fa-chevron-left text-[10px]"></i>
                 </div>
-                <div id="arrow-hint-r" class="absolute right-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none animate-pulse">
+                <div id="arrow-hint-r" class="absolute right-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none">
                     <i class="fas fa-chevron-right text-[10px]"></i>
                 </div>
 
-                <div id="date-scroll-box" class="flex overflow-x-auto no-scrollbar py-2 space-x-2 items-center flex-nowrap scroll-smooth">
+                <div id="date-scroll-box" class="flex overflow-x-auto no-scrollbar py-1 space-x-2 items-center flex-nowrap scroll-smooth">
                     <button onclick="switchView('checklist')" id="btn-checklist" 
-                        class="day-btn flex-shrink-0 w-12 h-12 rounded-2xl bg-white/50 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm backdrop-blur-md">
-                        <i class="fas fa-clipboard-check text-slate-400 text-lg"></i>
+                        class="day-btn flex-shrink-0 w-11 h-11 rounded-xl bg-white/50 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm backdrop-blur-md">
+                        <i class="fas fa-clipboard-check text-slate-400 text-base"></i>
                     </button>
                     <div id="day-buttons-container" class="flex flex-nowrap space-x-2"></div>
                 </div>
             </div>
-
             <!-- Progress -->
-            <div class="w-full bg-slate-200/30 h-[3px]">
+            <div class="w-full bg-slate-200/30 h-[2.5px]">
                 <div id="progress-bar" class="bg-sky-600 h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Content Area -->
-    <main id="content-area" class="px-6 py-4 max-w-lg mx-auto space-y-10"></main>
+    <!-- 主要內容區 -->
+    <main id="content-area" class="px-6 py-6 max-w-lg mx-auto space-y-10"></main>
 
-    <!-- Bottom Nav -->
+    <!-- 底部導航 -->
     <nav class="fixed bottom-6 left-6 right-6 z-50">
         <div class="glass-card rounded-[32px] p-4 flex justify-between items-center shadow-2xl">
             <div class="pl-2">
@@ -267,9 +212,7 @@
     </nav>
 
     <script>
-        // Constants
         const JPY_TO_TWD = 0.21;
-        const SCROLL_THRESHOLD = 30; 
 
         const getWeatherIcon = (desc) => {
             if (desc.includes("晴れ") || desc.includes("快晴")) return "fa-sun text-amber-500";
@@ -286,7 +229,7 @@
             { date: "3/29", day: "Day 04", weather_jp: "雪", temp: "0°C / 5°C", haiku: "小樽路や 運河に舞いし 春の雪", hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 (往返)", activities: [{ title: "小樽甜點街", desc: "漫步堺町通，六花亭、北菓樓名店林立，是購買精緻甜食的首選。" }, { title: "籔半蕎麥麵", desc: "在充滿歷史情懷的石磨麵屋中，品嚐手工蕎麥麵的獨特香氣。" }, { title: "山中牧場冰淇淋", desc: "牧場直送的極致美味！純粹無添加的奶香是小樽必嚐療癒甜點。" }, { title: "小樽運河夜景", desc: "石造倉庫群與瓦斯燈倒映在靜謐的水面，呈現極致的浪漫懷舊感。" }], lunch: "蕎麥屋 籔半", dinner: "寶壽司" },
             { date: "3/30", day: "Day 05", weather_jp: "曇り", temp: "1°C / 7°C", haiku: "湯の煙 地獄の谷に 春霞", hotel: "登別第一瀧本館", transport: "JR 特急北斗號 + 巴士", activities: [{ title: "移動至登別", desc: "搭乘特急前往著名的溫泉之鄉。登別以多樣泉質聞名，是放鬆身心的絕佳站。" }, { title: "尼克斯海洋公園", desc: "融合北歐建築風格的水族館，最受歡迎的是可愛的企鵝遊行。" }, { title: "第一瀧本館溫泉", desc: "擁有24小時超大浴場，可一邊泡湯一邊眺望地獄谷壯闊風景。" }], lunch: "自理", dinner: "飯店豪華晚宴" },
             { date: "3/31", day: "Day 06", weather_jp: "快晴", temp: "4°C / 11°C", haiku: "青い空 旅路を照らす 春の風", hotel: "札幌全日空皇冠假日酒店", transport: "JR 特急北斗號", activities: [{ title: "登別溫泉街散策", desc: "逛逛商店街，尋找隱藏在遍布各處的鬼怪石像，感受地獄谷氣息。" }, { title: "返回札幌市區", desc: "帶著溫泉後的舒爽心情返回市中心，入住靠近車站的飯店。" }, { title: "自由採買時間", desc: "前往札幌車站周邊大型百貨與地下街，享受採購與生活樂趣。" }], lunch: "溫泉街小吃", dinner: "拉麵信玄" },
-            { date: "4/01", day: "Day 07", weather_jp: "雨", temp: "5°C / 9°C", haiku: "雨の午後 チョコの香りに 春を知る", hotel: "札幌全日空皇冠假日酒店", transport: "地鐵 + 直達巴士", activities: [{ title: "白色戀人公園", desc: "夢幻的巧克力工廠，除了伴手禮，也能享用限定甜點。" }, { title: "三井 Outlet Park 北廣島", desc: "精選品牌包括：UNITED ARROWS LTD.、BEAMS、URBAN RESEARCH warehouse、LOWRYS FARM、GLOBAL WORK，更有 THE NORTH FACE、New Balance Factory Store 及 ASICS FACTORY 等運動戶外名店。", extraLink: { label: "Floor Map (PDF)", url: "https://mitsui-shopping-park.com/mop/file/filter/sapporo/floor/00009_fo.pdf", icon: "fa-map-location-dot" } }], lunch: "Outlet 美食街", dinner: "迴轉壽司 Toriton" },
+            { date: "4/01", day: "Day 07", weather_jp: "雨", temp: "5°C / 9°C", haiku: "雨の午後 チョコの香りに 春を知る", hotel: "札幌全日空皇冠假日酒店", transport: "地鐵 + 直達巴士", activities: [{ title: "白色戀人公園", desc: "夢幻的巧克力工廠，除了伴手禮，也能享用限定甜點。" }, { title: "三井 Outlet Park 北廣島", desc: "精選品牌包括：UNITED ARROWS LTD.、BEAMS、URBAN RESEARCH warehouse、LOWRYS FARM、GLOBAL WORK，更有 THE NORTH FACE、New Balance 及 ASICS 等運動戶外名店。", extraLink: { label: "Floor Map (PDF)", url: "https://mitsui-shopping-park.com/mop/file/filter/sapporo/floor/00009_fo.pdf", icon: "fa-map-location-dot" } }], lunch: "Outlet 美食街", dinner: "迴轉壽司 Toriton" },
             { date: "4/02", day: "Day 08", weather_jp: "晴れ", temp: "6°C / 13°C", haiku: "旅終わり 空港に吹く 春一番", hotel: "無 (回程)", transport: "JR 快速 Airport 號", activities: [{ title: "空港最後掃貨", desc: "新千歲空港國內線航廈是購物天堂，請留足時間買齊清單。" }, { title: "賦歸回台", desc: "帶著滿載的行李與充實的回憶，前往國際線登機，為這段旅程畫下完美點。" }], lunch: "豚丼信玄 (機場店)", dinner: "機上餐食" }
         ];
 
@@ -300,7 +243,6 @@
         let currentView = 'day';
         let currentDayIdx = 0;
         let expandedActivityIdx = null; 
-        let isShrunk = false;
         let lastKnownScrollPosition = 0;
         let ticking = false;
 
@@ -316,7 +258,7 @@
             renderContent();
             calculateGlobalStats();
             setupScrollerEvents();
-            setupUnifiedScroll();
+            setupSimplifiedScroll();
         }
 
         function detectCurrentDay() {
@@ -354,9 +296,9 @@
             }, 500);
         }
 
-        // 整合視差與 Header 的捲動處理器
-        function setupUnifiedScroll() {
-            const header = document.getElementById('main-header');
+        function setupSimplifiedScroll() {
+            const infoHeader = document.getElementById('info-header');
+            const stickyNav = document.getElementById('sticky-nav');
             const bg1 = document.getElementById('bg-layer-1');
             const bg2 = document.getElementById('bg-layer-2');
 
@@ -365,18 +307,22 @@
 
                 if (!ticking) {
                     window.requestAnimationFrame(() => {
-                        // 1. Header 收縮邏輯
-                        if (lastKnownScrollPosition > SCROLL_THRESHOLD && !isShrunk) {
-                            header.classList.add('shrunk');
-                            isShrunk = true;
-                        } else if (lastKnownScrollPosition <= 10 && isShrunk) {
-                            header.classList.remove('shrunk');
-                            isShrunk = false;
-                        }
+                        // 1. 資訊區淡化位移 (GPU加速，不影響佈局)
+                        const fadeVal = Math.max(0, 1 - lastKnownScrollPosition / 100);
+                        const transVal = lastKnownScrollPosition * 0.4;
+                        infoHeader.style.opacity = fadeVal;
+                        infoHeader.style.transform = `translate3d(0, -${transVal}px, 0)`;
 
-                        // 2. 背景視差邏輯 (使用不同的速率)
+                        // 2. 背景視差
                         bg1.style.transform = `translate3d(0, ${lastKnownScrollPosition * 0.3}px, 0)`;
                         bg2.style.transform = `translate3d(0, ${lastKnownScrollPosition * 0.2}px, 0)`;
+
+                        // 3. 粘性導航狀態標記 (僅用於微調樣式)
+                        if (lastKnownScrollPosition > 50) {
+                            stickyNav.classList.add('is-stuck');
+                        } else {
+                            stickyNav.classList.remove('is-stuck');
+                        }
 
                         ticking = false;
                     });
@@ -389,9 +335,9 @@
             const container = document.getElementById('day-buttons-container');
             container.innerHTML = itinerary.map((d, i) => `
                 <button onclick="switchView('day', ${i})" id="btn-day-${i}" 
-                    class="day-btn flex-shrink-0 w-12 h-12 rounded-2xl bg-white/40 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm backdrop-blur-md">
-                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">${d.day.split(' ')[1]}</span>
-                    <span class="text-sm font-black text-slate-800 leading-none">${d.date.split('/')[1]}</span>
+                    class="day-btn flex-shrink-0 w-11 h-11 rounded-xl bg-white/40 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm backdrop-blur-md">
+                    <span class="text-[7px] font-black text-slate-400 uppercase tracking-tighter">${d.day.split(' ')[1]}</span>
+                    <span class="text-xs font-black text-slate-800 leading-none">${d.date.split('/')[1]}</span>
                 </button>
             `).join('');
             updateActiveState();
