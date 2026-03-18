@@ -65,18 +65,30 @@
             .bg-glow-2 { background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); }
             .glass-card { background: rgba(30, 41, 59, 0.7) !important; border-color: rgba(255, 255, 255, 0.1) !important; }
             .text-slate-800 { color: #f1f5f9 !important; }
+            .text-slate-700 { color: #e2e8f0 !important; }
             .bg-white\/40 { background: rgba(15, 23, 42, 0.4) !important; }
+            .bg-white\/30 { background: rgba(255, 255, 255, 0.05) !important; }
             .bg-white\/50 { background: rgba(30, 41, 59, 0.5) !important; }
             .bg-sky-50 { background: rgba(14, 165, 233, 0.1) !important; }
             input { color: #ffffff !important; }
         }
 
-        /* 標題進場動畫 */
+        /* 動畫定義 */
         @keyframes fadeInSlide {
             0% { opacity: 0; transform: translateX(-20px); }
             100% { opacity: 1; transform: translateX(0); }
         }
         .animate-header-info { animation: fadeInSlide 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        /* 卡片進場動畫：交錯滑入且帶點彈性 */
+        @keyframes cardSlideIn {
+            0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .stagger-item {
+            opacity: 0;
+            animation: cardSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
 
         .day-active {
             background: var(--hk-deep) !important; 
@@ -88,7 +100,14 @@
 
         .day-active span, .day-active i { color: #ffffff !important; opacity: 1 !important; }
 
-        /* 漸層遮罩 */
+        .utility-active {
+            background: var(--hk-sky) !important;
+            color: white !important;
+            box-shadow: 0 8px 16px -4px rgba(14, 165, 233, 0.4);
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+        .utility-active i, .utility-active span { color: white !important; }
+
         .scroller-container { position: relative; }
         .scroller-mask-left {
             position: absolute; left: 0; top: 0; bottom: 0; width: 40px; z-index: 10;
@@ -110,7 +129,6 @@
             transform: translateZ(0);
         }
 
-        /* 導航欄固定樣式 */
         .sticky-nav-wrapper {
             position: sticky;
             top: 0;
@@ -129,43 +147,29 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .checked-item { opacity: 0.4; filter: grayscale(0.8); }
-
         .content-collapsed { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .content-expanded { max-height: 1200px; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .animate-up { animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .font-montserrat { font-family: 'Montserrat', sans-serif; }
 
-        /* 地鐵助手懸浮窗動畫 */
         #subway-panel {
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transform: translateY(20px) scale(0.9);
             opacity: 0;
             pointer-events: none;
         }
-        #subway-panel.active {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #subway-panel.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+        #map-modal { transition: opacity 0.3s ease; z-index: 100; }
 
-        /* 全螢幕圖片查看器 */
-        #map-modal {
-            transition: opacity 0.3s ease;
-            z-index: 100;
-        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="pb-12">
 
-    <!-- 視差背景層 -->
     <div id="bg-layer-1" class="parallax-bg"><div class="bg-glow-1"></div></div>
     <div id="bg-layer-2" class="parallax-bg"><div class="bg-glow-2"></div></div>
 
-    <!-- 頂部資訊區 (優化版 Header) -->
-    <header id="info-header" class="px-6 pt-12 pb-8 flex flex-col transition-all duration-500 will-change-transform">
+    <header id="info-header" class="px-6 pt-12 pb-4 flex flex-col transition-all duration-500 will-change-transform">
         <div class="animate-header-info">
             <div class="flex items-center space-x-3 mb-3">
                 <span class="px-2.5 py-1 bg-sky-500 text-[10px] font-black text-white rounded-full uppercase tracking-tighter animate-pulse">Live</span>
@@ -188,333 +192,417 @@
                 </p>
             </div>
         </div>
+
+        <div class="flex space-x-3 mt-8 animate-header-info" style="animation-delay: 0.1s">
+            <button onclick="switchView('checklist')" id="btn-checklist-nav" 
+                class="flex-1 flex items-center justify-center space-x-2 py-3.5 bg-white/40 border border-white rounded-2xl transition-all shadow-sm">
+                <i class="fas fa-clipboard-check text-slate-400 text-sm"></i>
+                <span class="text-[13px] font-bold text-slate-600">行前清單</span>
+            </button>
+            <button onclick="switchView('shopping')" id="btn-shopping-nav" 
+                class="flex-1 flex items-center justify-center space-x-2 py-3.5 bg-white/40 border border-white rounded-2xl transition-all shadow-sm">
+                <i class="fas fa-shopping-bag text-slate-400 text-sm"></i>
+                <span class="text-[13px] font-bold text-slate-600">代購清單</span>
+            </button>
+        </div>
     </header>
 
-    <!-- 原生 Sticky 導航條 -->
     <div id="sticky-nav" class="sticky-nav-wrapper">
         <div class="glass-card mx-4 rounded-3xl overflow-hidden border-white/40 shadow-xl">
             <div class="scroller-container px-4 py-3.5">
                 <div class="scroller-mask-left" id="mask-l"></div>
                 <div class="scroller-mask-right" id="mask-r"></div>
-                
-                <div id="arrow-hint-l" class="absolute left-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none">
-                    <i class="fas fa-chevron-left text-[11px]"></i>
-                </div>
-                <div id="arrow-hint-r" class="absolute right-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none">
-                    <i class="fas fa-chevron-right text-[11px]"></i>
-                </div>
-
+                <div id="arrow-hint-l" class="absolute left-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none"><i class="fas fa-chevron-left text-[11px]"></i></div>
+                <div id="arrow-hint-r" class="absolute right-1 top-1/2 -translate-y-1/2 z-20 text-sky-500 opacity-0 transition-opacity duration-300 pointer-events-none"><i class="fas fa-chevron-right text-[11px]"></i></div>
                 <div id="date-scroll-box" class="flex overflow-x-auto no-scrollbar py-1 space-x-3 items-center flex-nowrap scroll-smooth">
-                    <button onclick="switchView('checklist')" id="btn-checklist" 
-                        class="day-btn flex-shrink-0 w-12 h-12 rounded-xl bg-white/50 border border-white flex flex-col items-center justify-center transition-all duration-300 shadow-sm backdrop-blur-md">
-                        <i class="fas fa-clipboard-check text-slate-500 text-lg"></i>
-                    </button>
                     <div id="day-buttons-container" class="flex flex-nowrap space-x-3"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 主要內容區 -->
     <main id="content-area" class="px-6 py-6 max-w-lg mx-auto space-y-12"></main>
 
-    <!-- 地鐵助手 (保留此功能以利交通) -->
     <div class="fixed bottom-10 right-6 z-[60]">
         <div id="subway-panel" class="glass-card absolute bottom-18 right-0 w-64 rounded-3xl p-6 shadow-2xl border-white/80">
-            <h4 class="text-[13px] font-black text-slate-400 uppercase tracking-widest mb-5 flex items-center">
-                <i class="fas fa-map-location-dot mr-2 text-sky-500"></i> 地鐵助手
-            </h4>
+            <h4 class="text-[13px] font-black text-slate-400 uppercase tracking-widest mb-5 flex items-center"><i class="fas fa-map-location-dot mr-2 text-sky-500"></i> 地鐵助手</h4>
             <div class="space-y-3">
-                <button onclick="openSubwayMap()" class="w-full bg-white/60 py-4 rounded-2xl text-[12px] font-bold text-slate-700 flex items-center justify-center hover:bg-white transition-all shadow-sm">
-                    <i class="fas fa-map mr-2 text-sky-500 text-sm"></i> 查看全線路線圖
-                </button>
-                <button onclick="findNearestStation()" class="w-full bg-sky-600 text-white py-4 rounded-2xl text-[12px] font-bold flex items-center justify-center hover:bg-sky-700 transition-all shadow-lg">
-                    <i class="fas fa-location-crosshairs mr-2 text-sm"></i> 尋找最近車站
-                </button>
-                <div id="nearest-info" class="text-[11px] text-slate-400 text-center mt-3 font-medium italic hidden">
-                    正在定位中...
-                </div>
+                <button onclick="openSubwayMap()" class="w-full bg-white/60 py-4 rounded-2xl text-[12px] font-bold text-slate-700 flex items-center justify-center hover:bg-white shadow-sm"><i class="fas fa-map mr-2 text-sky-500 text-sm"></i> 查看全線路線圖</button>
+                <button onclick="findNearestStation()" class="w-full bg-sky-600 text-white py-4 rounded-2xl text-[12px] font-bold flex items-center justify-center shadow-lg"><i class="fas fa-location-crosshairs mr-2 text-sm"></i> 尋找最近車站</button>
+                <div id="nearest-info" class="text-[11px] text-slate-400 text-center mt-3 font-medium italic hidden">正在定位中...</div>
             </div>
         </div>
-        <button onclick="toggleSubwayPanel()" class="w-14 h-14 bg-sky-900 text-white rounded-full shadow-2xl flex items-center justify-center transition-all active:scale-90 hover:bg-sky-950 border-4 border-white/20">
+        <button onclick="toggleSubwayPanel()" class="w-14 h-14 bg-sky-900 text-white rounded-full shadow-2xl flex items-center justify-center active:scale-90 border-4 border-white/20">
             <i class="fas fa-train-subway text-xl"></i>
         </button>
     </div>
 
-    <!-- 全螢幕圖片查看器 Modal -->
     <div id="map-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <button onclick="closeSubwayMap()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-all">
-            <i class="fas fa-xmark text-2xl"></i>
-        </button>
+        <button onclick="closeSubwayMap()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-all"><i class="fas fa-xmark text-2xl"></i></button>
         <div class="max-w-5xl w-full max-h-[85vh] overflow-auto rounded-2xl shadow-2xl bg-white p-2">
             <img src="subwayrosenzu.jpg" alt="北海道地鐵全線圖" class="w-full h-auto block rounded-xl">
         </div>
-        <p class="absolute bottom-6 text-white/50 text-[11px] font-bold uppercase tracking-widest">點擊外部或按鈕以關閉</p>
     </div>
 
     <script>
         const JPY_TO_TWD = 0.21;
-
         const sapSubwayStations = [
-            { name: "札幌站 (さっぽろ)", lat: 43.0686, lng: 141.3508, line: "南北線/東豐線" },
-            { name: "大通站 (おおどおり)", lat: 43.0611, lng: 141.3533, line: "全線轉乘" },
-            { name: "薄野站 (すすきの)", lat: 43.0555, lng: 141.3533, line: "南北線" },
-            { name: "中島公園站", lat: 43.0475, lng: 141.3539, line: "南北線" },
-            { name: "圓山公園站", lat: 43.0519, lng: 141.3184, line: "東西線" },
-            { name: "二十四軒站", lat: 43.0694, lng: 141.3144, line: "東西線" },
-            { name: "東區役所前站", lat: 43.0788, lng: 141.3622, line: "東豐線" }
+            { name: "札幌站", lat: 43.0686, lng: 141.3508 }, { name: "大通站", lat: 43.0611, lng: 141.3533 },
+            { name: "薄野站", lat: 43.0555, lng: 141.3533 }, { name: "圓山公園站", lat: 43.0519, lng: 141.3184 }
         ];
 
-        const getWeatherIcon = (desc) => {
-            if (desc.includes("晴れ") || desc.includes("快晴")) return "fa-sun text-amber-500";
-            if (desc.includes("曇り")) return "fa-cloud text-slate-400";
-            if (desc.includes("雪")) return "fa-snowflake text-sky-300";
-            if (desc.includes("雨")) return "fa-cloud-showers-heavy text-indigo-500";
-            return "fa-cloud-sun text-amber-400";
-        };
-
-        const itinerary = [
-            { date: "3/26", day: "Day 01", weather_jp: "曇り", temp: "2°C / 8°C", haiku: "春の雲 旅の始まり 札幌へ", hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 + 地鐵南北線", activities: [{ title: "新千歲機場抵達", desc: "抵達北海道門戶，建議先到國內線航廈，感受豐富的伴手禮與Royce巧克力工廠美食。" }, { title: "飯店存放行李", desc: "抵達薄野核心區域，安頓後準備展開札幌市區的探索旅程。" }, { title: "狸小路 1-7 丁目散策", desc: "橫跨七個街區的百年商店街，藥妝、餐廳、伴手禮店林立，充滿在地活力。" }], lunch: "根室花丸壽司", dinner: "GARAKU 湯咖哩" },
-            { date: "3/27", day: "Day 02", weather_jp: "晴れ", temp: "3°C / 10°C", haiku: "学び舎に 春の陽射しや 北大路", hotel: "札幌全日空薄野假日酒店", transport: "地鐵南北線/東豐線", activities: [{ title: "北海道大學漫步", desc: "感受日本最美校園，漫步銀杏大道與歷史悠久的歐風建築群。" }, { title: "諏訪神社參拜", desc: "著名的「花手水」神社，洗手池中鋪滿季節花卉，是拍照與祈好運熱點。" }, { title: "札幌啤酒博物館", desc: "了解日本啤酒開拓史，並可以在結束後試喝最新鮮的開拓使啤酒。" }], lunch: "北大中央食堂", dinner: "札幌啤酒園燒肉" },
-            { date: "3/28", day: "Day 03", weather_jp: "曇り時々晴れ", temp: "4°C / 9°C", haiku: "祈り捧ぐ 響くメロディ 春の宵", hotel: "札幌全日空薄野假日酒店", transport: "地鐵東西線 + 東豐線", 
+        let itinerary = [
+            { date: "3/26", day: "Day 01", weather_jp: "曇り", temp: "2°C / 8°C", haiku: "春の雲 旅の始まり 札幌へ", hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 + 地鐵南北線", transit_steps: "1. 搭乘 JR 快速 Airport 號至札幌站。<br>2. 轉乘地下鐵南北線（真駒內方向）至薄野站 (Susukino)。", activities: [{ title: "新千歲機場抵達", desc: "抵達北海道門戶，建議先到國內線航廈，感受豐富的伴手禮與Royce巧克力工廠美食。" }, { title: "飯店存放行李", desc: "抵達薄野核心區域，安頓後準備展開札幌市區的探索旅程。" }, { title: "狸小路 1-7 丁目散策", desc: "橫跨七個街區的百年商店街，藥妝、餐廳、伴手禮店林立，充滿在地活力。" }], lunch: "根室花丸壽司", dinner: "GARAKU 湯咖哩" },
+            { 
+                date: "3/27", day: "Day 02", weather_jp: "晴れ", temp: "3°C / 10°C", haiku: "学び舎に 春の陽射しや 北大路", hotel: "札幌全日空薄野假日酒店", transport: "地鐵南北線/東豐線", 
+                transit_steps: "1. 搭乘南北線向北至『北12條站』步行至北大。<br>2. 轉乘東豐線至『東區役所前站』步行至啤酒園。",
                 activities: [
-                    { title: "北海道神宮", desc: "北海道最大的守護神殿，氣氛肅穆寧靜。" }, 
-                    { title: "サンドイッチ工房 サンドイッチ曼", desc: "傳說級的三明治專賣店！非常推薦外帶一份到公園野餐。", mapLink: "https://maps.app.goo.gl/Bo76cAjoerBBvQPu6" },
-                    { title: "圓山公園", desc: "當地人最愛的休憩場地，享受初春清新的空氣與野餐時光。" }, 
-                    { title: "Vaundy 演唱會", desc: "旅程的核心時刻！在震憾的音場中感受 Vaundy 獨特的音樂世界。" }
-                ], lunch: "炸豬排 玉藤", dinner: "串鳥居居屋" },
-            { date: "3/29", day: "Day 04", weather_jp: "雪", temp: "0°C / 5°C", haiku: "小樽路や 運河に舞いし 春の雪", hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 (往返)", activities: [{ title: "小樽甜點街", desc: "漫步堺町通，購買精緻甜食的首選。" }, { title: "籔半蕎麥麵", desc: "在充滿歷史情懷的麵屋中，品嚐手工蕎麥麵的獨特香氣。" }, { title: "山中牧場冰淇淋", desc: "牧場直送的極致美味！純粹無添加的奶香是小樽必嚐療癒甜點。" }, { title: "小樽運河夜景", desc: "石造倉庫群與瓦斯燈倒映，呈現極致的浪漫懷舊感。" }], lunch: "蕎麥屋 籔半", dinner: "寶壽司" },
-            { date: "3/30", day: "Day 05", weather_jp: "曇り", temp: "1°C / 7°C", haiku: "湯の煙 地獄の谷に 春霞", hotel: "登別第一瀧本館", transport: "JR 特急北斗號 + 巴士", activities: [{ title: "移動至登別", desc: "前往著名的溫泉之鄉，享受放鬆身心的絕佳站。" }, { title: "尼克斯海洋公園", desc: "融合北歐建築風格的水族館，最受歡迎的是可愛的企鵝遊行。" }, { title: "第一瀧本館溫泉", desc: "擁有24小時超大浴場，可一邊泡湯一邊眺望地獄谷風景。" }], lunch: "自理", dinner: "飯店豪華晚宴" },
-            { date: "3/31", day: "Day 06", weather_jp: "快晴", temp: "4°C / 11°C", haiku: "青い空 旅路を照らす 春の風", hotel: "札幌全日空皇冠假日酒店", transport: "JR 特急北斗號", 
+                    { title: "北海道大學漫步", desc: "感受日本最美校園，漫步銀杏大道與歷史悠久的歐風建築群。" }, 
+                    { title: "諏訪神社參拜", desc: "著名的「花手水」神社，洗手池中鋪滿季節花卉，是拍照與祈好運熱點。" }, 
+                    { 
+                        title: "札幌啤酒園 & 晚餐預約", 
+                        desc: "【預約確定 | 開拓使館】<br>• 時間：17:30<br>• 確認碼：S6S3CH<br>• 人數：2位<br>• 姓名：鞠 淳喩", 
+                        mapLink: "https://maps.app.goo.gl/pyXJaUKYt4dxSXfAA" 
+                    }
+                ], 
+                lunch: "北大中央食堂", dinner: "札幌啤酒園 開拓使館 (17:30)" 
+            },
+            { date: "3/28", day: "Day 03", weather_jp: "曇り時々晴れ", temp: "4°C / 9°C", haiku: "祈り捧ぐ 響くメロディ 春の宵", hotel: "札幌全日空薄野假日酒店", transport: "地鐵東西線 + 東豐線", transit_steps: "1. 步行至大通站轉乘東西線至『圓山公園站』。<br>2. 演唱會場地可搭乘東豐線至『豐平公園站』直達 Kitayell。", activities: [{ title: "北海道神宮", desc: "北海道最大的守護神殿，氣氛肅穆寧靜。" }, { title: "サンドイッチ工房 サンドイッチ曼", desc: "傳說級的三明治專賣店！非常推薦外帶一份到公園野餐。", mapLink: "https://maps.app.goo.gl/Bo76cAjoerBBvQPu6" }, { title: "圓山公園", desc: "當地人最愛的休憩場地，享受初春清新的空氣與野餐時光。" }, { title: "Vaundy 演唱會", desc: "旅程的核心時刻！在震憾的音場中感受 Vaundy 獨特的音樂世界。" }], lunch: "炸豬排 玉藤", dinner: "串鳥居居屋" },
+            { date: "3/29", day: "Day 04", weather_jp: "雪", temp: "0°C / 5°C", haiku: "小樽路や 運河に舞いし 春の雪", hotel: "札幌全日空薄野假日酒店", transport: "JR 快速 (往返)", transit_steps: "1. 搭乘南北線至札幌站。<br>2. 換乘 JR 函館本線（小樽方向）快速列車，車程約 35 分鐘。", activities: [{ title: "小樽甜點街", desc: "漫步堺町通，購買精緻甜食的首選。" }, { title: "籔半蕎麥麵", desc: "在充滿歷史情懷的麵屋中，品嚐手工蕎麥麵的獨特香氣。" }, { title: "山中牧場冰淇淋", desc: "牧場直送的極致美味！純粹無添加的奶香是小樽必嚐療癒甜點。" }, { title: "小樽運河夜景", desc: "石造倉庫群與瓦斯燈倒映，呈現極致的浪漫懷舊感。" }], lunch: "蕎麥屋 籔半", dinner: "寶壽司" },
+            { date: "3/30", day: "Day 05", weather_jp: "曇り", temp: "1°C / 7°C", haiku: "湯の煙 地獄の谷に 春霞", hotel: "登別第一瀧本館", transport: "JR 特急北斗號 + 巴士", transit_steps: "1. 札幌站搭乘 JR 特急北斗號至登別站。<br>2. 站前換乘道南巴士至『登別溫泉』終點站下車。", activities: [{ title: "移動至登別", desc: "前往著名的溫泉之鄉，享受放鬆身心的絕佳站。" }, { title: "尼克斯海洋公園", desc: "融合北歐建築風格的水族館，最受歡迎的是可愛的企鵝遊行。" }, { title: "第一瀧本館溫泉", desc: "擁有24小時超大浴場，可一邊泡湯一邊眺望地獄谷風景。" }], lunch: "自理", dinner: "飯店豪華晚宴" },
+            { 
+                date: "3/31", day: "Day 06", weather_jp: "快晴", temp: "4°C / 11°C", haiku: "青い空 旅路を照らす 春の風", 
+                hotel: "札幌京王廣場酒店", 
+                transport: "JR 特急北斗號", 
+                transit_steps: "1. 登別站搭乘 JR 特急北斗號返回札幌站。<br>2. 札幌站西口步行約 5 分鐘即可抵達京王酒店。",
                 activities: [
                     { title: "登別溫泉街散策", desc: "逛逛商店街，尋找遍布各處的鬼怪石像。" }, 
                     { title: "返回札幌市區", desc: "帶著舒爽心情返回市中心，展開採買大計。" }, 
                     { title: "Standard Products 札幌PARCO店", desc: "DAISO旗下的質感系品牌，設計簡約且高品質。", mapLink: "https://maps.app.goo.gl/39QUJffmh83gfCze6" },
                     { title: "雪印パーラー 本店", desc: "必吃昭和天皇曾享用的『傳說中冰淇淋』Snow Royal。", mapLink: "https://maps.app.goo.gl/pyXJaUKYt4dxSXfAA" },
                     { title: "自由採買時間", desc: "前往札幌車站周邊百貨與地下街，享受購貨樂趣。" }
-                ], lunch: "溫泉街小吃", dinner: "拉麵信玄" },
-            { date: "4/01", day: "Day 07", weather_jp: "雨", temp: "5°C / 9°C", haiku: "雨の午後 チョコの香りに 春を知る", hotel: "札幌全日空皇冠假日酒店", transport: "地鐵 + 直達巴士", activities: [{ title: "白色戀人公園", desc: "巧克力工廠享用限定甜點。" }, { title: "三井 Outlet Park 北廣島", desc: "精選日系與運動戶外名店，做最後採買。", extraLink: { label: "Floor Map (PDF)", url: "https://mitsui-shopping-park.com/mop/file/filter/sapporo/floor/00009_fo.pdf", icon: "fa-map-location-dot" } }], lunch: "Outlet 美食街", dinner: "迴轉壽司 Toriton" },
-            { date: "4/02", day: "Day 08", weather_jp: "晴れ", temp: "6°C / 13°C", haiku: "旅終わり 空港に吹く 春一番", hotel: "無 (回程)", transport: "JR 快速 Airport 號", activities: [{ title: "空港最後掃貨", desc: "新千歲空港國內線航廈是購物天堂。" }, { title: "賦歸回台", desc: "帶著滿載的行李進攻登機，結束完美旅程。" }], lunch: "豚丼信玄 (機場店)", dinner: "機上餐食" }
+                ], lunch: "溫泉街小吃", dinner: "拉麵信玄" 
+            },
+            { date: "4/01", day: "Day 07", weather_jp: "雨", temp: "5°C / 9°C", haiku: "雨の午後 チョコ的香りに 春を知る", hotel: "札幌京王廣場酒店", transport: "地鐵 + 直達巴士", transit_steps: "1. 搭乘地下鐵東西線至『宮之澤站』前往白色戀人公園。<br>2. 至札幌站前搭乘直達巴士前往三井 Outlet。", activities: [{ title: "白色戀人公園", desc: "巧克力工廠享用限定甜點。" }, { title: "三井 Outlet Park 北廣島", desc: "精選日系與運動戶外名店，做最後採買。", extraLink: { label: "Floor Map (PDF)", url: "https://mitsui-shopping-park.com/mop/file/filter/sapporo/floor/00009_fo.pdf", icon: "fa-map-location-dot" } }], lunch: "Outlet 美食街", dinner: "迴轉壽司 Toriton" },
+            { date: "4/02", day: "Day 08", weather_jp: "晴れ", temp: "6°C / 13°C", haiku: "旅終わり 空港に吹く 春一番", hotel: "無 (回程)", transport: "JR 快速 Airport 號", transit_steps: "1. 札幌站搭乘 JR 快速 Airport 號。<br>2. 建議提前 3 小時抵達，國內線航廈有極多伴手禮可買。", activities: [{ title: "空港最後掃貨", desc: "新千歲空港國內線航廈是購物天堂。" }, { title: "賦歸回台", desc: "帶著滿載的行李進攻登機，結束完美旅程。" }], lunch: "豚丼信玄 (機場店)", dinner: "機上餐食" }
         ];
 
-        const checklistData = [
-            { category: "重要文件", items: ["護照正本", "日幣/信用卡", "保險文件", "演唱會門票", "VJW"] },
-            { category: "電子產品", items: ["行動電源", "充電線", "SIM卡", "相機"] },
-            { category: "必備衣物", items: ["外套", "發熱衣褲", "手套圍巾", "防滑鞋"] },
-            { category: "個人用品", items: ["常備藥", "保濕", "雨具", "購物袋"] }
-        ];
+        let currentView = 'checklist', currentDayIdx = 0, expandedActivityIdx = null, isWeatherLive = false, isTransitExpanded = false;
 
-        let currentView = 'day';
-        let currentDayIdx = 0;
-        let expandedActivityIdx = null; 
-        let lastKnownScrollPosition = 0;
-        let ticking = false;
-
-        function init() {
+        async function init() {
             detectCurrentDay();
+            await updateWeatherFromJMA();
             renderDayButtons();
             renderContent();
             setupScrollerEvents();
             setupSimplifiedScroll();
-
-            document.getElementById('map-modal').addEventListener('click', (e) => {
-                if (e.target.id === 'map-modal') closeSubwayMap();
-            });
+            document.getElementById('map-modal').addEventListener('click', (e) => { if (e.target.id === 'map-modal') closeSubwayMap(); });
         }
 
-        function openSubwayMap() {
-            const modal = document.getElementById('map-modal');
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; 
-            toggleSubwayPanel(); 
-        }
-
-        function closeSubwayMap() {
-            const modal = document.getElementById('map-modal');
-            modal.classList.add('hidden');
-            document.body.style.overflow = ''; 
-        }
-
-        function toggleSubwayPanel() {
-            document.getElementById('subway-panel').classList.toggle('active');
-        }
-
-        function findNearestStation() {
-            const info = document.getElementById('nearest-info');
-            info.classList.remove('hidden');
-            info.innerText = "正在取得定位...";
-            if (!navigator.geolocation) { info.innerText = "不支援定位。"; return; }
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const uLat = pos.coords.latitude, uLng = pos.coords.longitude;
-                let nearest = null, minDist = Infinity;
-                sapSubwayStations.forEach(st => {
-                    const d = Math.sqrt(Math.pow(st.lat - uLat, 2) + Math.pow(st.lng - uLng, 2));
-                    if (d < minDist) { minDist = d; nearest = st; }
+        async function updateWeatherFromJMA() {
+            try {
+                const [respSap, respNob] = await Promise.all([
+                    fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/016000.json'),
+                    fetch('https://www.jma.go.jp/bosai/forecast/data/forecast/015000.json')
+                ]);
+                const dataSap = await respSap.json(), dataNob = await respNob.json();
+                const sapForecasts = dataSap[1].timeSeries[0], sapTemps = dataSap[1].timeSeries[2];
+                const nobForecasts = dataNob[1].timeSeries[0], nobTemps = dataNob[1].timeSeries[2];
+                itinerary.forEach((day, index) => {
+                    const currentYear = new Date().getFullYear();
+                    const dayParts = day.date.split('/');
+                    const targetDateStr = `${currentYear}-${dayParts[0].padStart(2, '0')}-${dayParts[1].padStart(2, '0')}`;
+                    const source = (index === 4 || index === 5) ? nobForecasts : sapForecasts;
+                    const tempSource = (index === 4 || index === 5) ? nobTemps : sapTemps;
+                    const dateIdx = source.timeDefines.findIndex(d => d.startsWith(targetDateStr));
+                    if (dateIdx !== -1) {
+                        day.weather_jp = source.areas[0].weathers[dateIdx].replace(/　/g, ' ');
+                        const minT = tempSource.areas[0].tempsMin[dateIdx] || '--';
+                        const maxT = tempSource.areas[0].tempsMax[dateIdx] || '--';
+                        day.temp = `${minT}°C / ${maxT}°C`;
+                        isWeatherLive = true;
+                    }
                 });
-                if (nearest) {
-                    info.innerHTML = `最近：<span class="text-sky-500 font-bold">${nearest.name}</span><br>導航中...`;
-                    setTimeout(() => { window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearest.lat},${nearest.lng}`, '_blank'); toggleSubwayPanel(); }, 1200);
-                }
-            }, () => { info.innerText = "定位失敗。"; });
+            } catch (error) { console.error("JMA Failed:", error); }
+        }
+
+        // --- 功能模組 ---
+        function getChecklist() { 
+            const saved = localStorage.getItem('hk_checklist_v2');
+            if (saved) return JSON.parse(saved);
+            const defaults = ["護照正本", "日幣/信用卡", "保險文件", "演唱會門票", "VJW QR碼"];
+            return defaults.map(name => ({ id: Math.random(), name, checked: false }));
+        }
+        function saveChecklist(list) { localStorage.setItem('hk_checklist_v2', JSON.stringify(list)); }
+        function addChecklistItem() {
+            const input = document.getElementById('check-input'), val = input.value.trim();
+            if (!val) return;
+            const list = getChecklist(); list.push({ id: Date.now(), name: val, checked: false });
+            saveChecklist(list); input.value = ''; renderChecklist();
+        }
+        function toggleCheckItem(id) {
+            const list = getChecklist(), item = list.find(i => i.id === id);
+            if (item) item.checked = !item.checked; saveChecklist(list); renderChecklist();
+        }
+        function deleteCheckItem(id) { saveChecklist(getChecklist().filter(i => i.id !== id)); renderChecklist(); }
+
+        function renderChecklist() {
+            const area = document.getElementById('content-area'), list = getChecklist();
+            area.innerHTML = `<div>
+                <div class="mb-10 text-center stagger-item" style="animation-delay: 0s">
+                    <i class="fas fa-clipboard-check text-sky-500 text-4xl mb-5"></i>
+                    <p class="text-sky-600 font-black text-[11px] uppercase tracking-widest mb-1">Preparation</p>
+                    <h2 class="text-4xl font-black text-slate-800 tracking-tight">行前清單</h2>
+                </div>
+                <div class="glass-card p-6 rounded-[28px] mb-8 stagger-item" style="animation-delay: 0.1s">
+                    <div class="flex space-x-3">
+                        <input type="text" id="check-input" placeholder="新增項目..." onkeypress="if(event.key==='Enter')addChecklistItem()" class="flex-1 bg-white/30 border border-white/50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-sky-500">
+                        <button onclick="addChecklistItem()" class="bg-sky-600 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg">新增</button>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    ${list.map((item, i) => `<div class="glass-card p-5 rounded-[24px] flex items-center justify-between stagger-item" style="animation-delay: ${0.2 + (i * 0.05)}s"><div onclick="toggleCheckItem(${item.id})" class="flex items-center flex-1 cursor-pointer"><div class="w-7 h-7 rounded-full border-2 ${item.checked ? 'bg-emerald-500 border-emerald-500' : 'border-white'} flex items-center justify-center mr-5 transition-all">${item.checked ? '<i class="fas fa-check text-white text-[10px]"></i>' : ''}</div><span class="text-[16px] font-bold ${item.checked ? 'opacity-30 line-through text-slate-500' : 'text-slate-700'}">${item.name}</span></div><button onclick="deleteCheckItem(${item.id})" class="text-slate-300 hover:text-rose-500 p-2 transition-colors"><i class="fas fa-trash-alt text-sm"></i></button></div>`).join('')}
+                </div>
+            </div>`;
+        }
+
+        function getShoppingList() { return JSON.parse(localStorage.getItem('hk_shopping_v3') || '[]'); }
+        function saveShoppingList(list) { localStorage.setItem('hk_shopping_v3', JSON.stringify(list)); }
+        function addShoppingItem() {
+            const input = document.getElementById('shop-input'), val = input.value.trim();
+            if (!val) return;
+            const list = getShoppingList(); list.push({ id: Date.now(), name: val, owner: '', price: 0, checked: false });
+            saveShoppingList(list); input.value = ''; renderShoppingList();
+        }
+        function updateShopPrice(id, price) {
+            const list = getShoppingList(), item = list.find(i => i.id === id);
+            if (item) item.price = parseFloat(price) || 0;
+            saveShoppingList(list); calculateShoppingTotal();
+        }
+        function updateShopOwner(id, owner) {
+            const list = getShoppingList(), item = list.find(i => i.id === id);
+            if (item) item.owner = owner;
+            saveShoppingList(list);
+        }
+        function calculateShoppingTotal() {
+            const list = getShoppingList();
+            const jpyTotal = list.filter(i => i.checked).reduce((sum, i) => sum + i.price, 0);
+            const totalEl = document.getElementById('shopping-total-display');
+            if (totalEl) totalEl.innerHTML = `已購總計: <span class="text-emerald-600 font-black">¥${jpyTotal.toLocaleString()}</span><br><span class="text-[11px] opacity-60">≈ NT$ ${Math.round(jpyTotal * JPY_TO_TWD).toLocaleString()}</span>`;
+        }
+        function toggleShoppingItem(id) {
+            const list = getShoppingList(), item = list.find(i => i.id === id);
+            if (item) item.checked = !item.checked; saveShoppingList(list); renderShoppingList();
+        }
+        function deleteShoppingItem(id) { saveShoppingList(getShoppingList().filter(i => i.id !== id)); renderShoppingList(); }
+        
+        function renderShoppingList() {
+            const area = document.getElementById('content-area'), list = getShoppingList();
+            area.innerHTML = `<div>
+                <div class="mb-10 text-center stagger-item" style="animation-delay: 0s">
+                    <i class="fas fa-shopping-bag text-sky-500 text-4xl mb-5"></i>
+                    <p class="text-sky-600 font-black text-[11px] uppercase tracking-widest mb-1">Shopping & Orders</p>
+                    <h2 class="text-4xl font-black text-slate-800 tracking-tight">代購清單</h2>
+                </div>
+                <div class="glass-card p-6 rounded-[28px] mb-8 stagger-item" style="animation-delay: 0.1s">
+                    <div class="flex space-x-3">
+                        <input type="text" id="shop-input" placeholder="新增代購品名..." onkeypress="if(event.key==='Enter')addShoppingItem()" class="flex-1 bg-white/30 border border-white/50 rounded-xl px-4 py-3 text-sm focus:outline-none">
+                        <button onclick="addShoppingItem()" class="bg-sky-600 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg">新增</button>
+                    </div>
+                </div>
+                <div class="space-y-5">
+                    ${list.map((item, i) => `
+                        <div class="glass-card p-6 rounded-[28px] flex flex-col space-y-4 stagger-item" style="animation-delay: ${0.2 + (i * 0.05)}s">
+                            <div class="flex items-center justify-between">
+                                <div onclick="toggleShoppingItem(${item.id})" class="flex items-center flex-1 cursor-pointer">
+                                    <div class="w-7 h-7 rounded-full border-2 ${item.checked ? 'bg-emerald-500 border-emerald-500' : 'border-white'} flex items-center justify-center mr-5 transition-all">
+                                        ${item.checked ? '<i class="fas fa-check text-white text-[10px]"></i>' : ''}
+                                    </div>
+                                    <span class="text-[17px] font-bold ${item.checked ? 'opacity-30 line-through text-slate-500' : 'text-slate-800'}">${item.name}</span>
+                                </div>
+                                <button onclick="deleteShoppingItem(${item.id})" class="text-slate-300 hover:text-rose-500 transition-colors p-2"><i class="fas fa-trash-alt text-sm"></i></button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-white/40 dark:bg-slate-800/40 p-3 rounded-2xl border border-white/50">
+                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">給誰</span>
+                                    <input type="text" value="${item.owner || ''}" placeholder="委託人" onchange="updateShopOwner(${item.id}, this.value)" class="w-full bg-transparent text-[13px] font-bold text-slate-700 outline-none">
+                                </div>
+                                <div class="bg-white/40 dark:bg-slate-800/40 p-3 rounded-2xl border border-white/50">
+                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">價格 ¥</span>
+                                    <input type="number" value="${item.price || ''}" placeholder="0" onchange="updateShopPrice(${item.id}, this.value)" class="w-full bg-transparent text-[14px] font-black font-montserrat text-right text-slate-700 outline-none">
+                                </div>
+                            </div>
+                        </div>`).join('')}
+                </div>
+                <div id="shopping-total-display" class="mt-10 p-8 glass-card rounded-[32px] text-center font-bold text-slate-700 text-lg border-emerald-400/30 stagger-item" style="animation-delay: 0.5s"></div>
+            </div>`;
+            calculateShoppingTotal();
+        }
+
+        // --- 核心 UI 控制 ---
+        function switchView(view, idx = 0) {
+            currentView = view;
+            if (view === 'day') { currentDayIdx = idx; expandedActivityIdx = null; isTransitExpanded = false; }
+            updateActiveState();
+            renderContent();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateActiveState() {
+            document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('day-active'));
+            document.getElementById('btn-checklist-nav').classList.remove('utility-active');
+            document.getElementById('btn-shopping-nav').classList.remove('utility-active');
+            if (currentView === 'checklist') document.getElementById('btn-checklist-nav').classList.add('utility-active');
+            else if (currentView === 'shopping') document.getElementById('btn-shopping-nav').classList.add('utility-active');
+            else if (document.getElementById(`btn-day-${currentDayIdx}`)) document.getElementById(`btn-day-${currentDayIdx}`).classList.add('day-active');
+        }
+
+        function renderContent() { 
+            if (currentView === 'checklist') renderChecklist(); 
+            else if (currentView === 'shopping') renderShoppingList();
+            else renderDay(); 
+        }
+
+        function updateExchange(jpy) {
+            document.getElementById('twd-res').innerText = `≈ NT$ ${Math.round((parseFloat(jpy) || 0) * JPY_TO_TWD).toLocaleString()}`;
+        }
+        
+        function clearCalculator() {
+            const input = document.getElementById('quick-calc');
+            input.value = ''; updateExchange(0); input.focus();
+        }
+
+        function renderDay() {
+            const d = itinerary[currentDayIdx], area = document.getElementById('content-area');
+            const weatherIcon = getWeatherIcon(d.weather_jp);
+            area.innerHTML = `<div>
+                <!-- 天氣卡片 -->
+                <div class="glass-card rounded-[32px] p-8 mb-10 relative overflow-hidden stagger-item" style="animation-delay: 0s">
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-[10px] font-black ${isWeatherLive ? 'text-emerald-500' : 'text-sky-600'} uppercase tracking-widest flex items-center"><i class="fas fa-tower-broadcast mr-1.5 text-[8px]"></i> ${isWeatherLive ? 'Live: 日本氣象廳數據' : 'Weather Forecast'}</p>
+                            ${isWeatherLive ? '<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>' : ''}
+                        </div>
+                        <div class="flex items-center space-x-5 mb-6">
+                            <i class="fas ${weatherIcon} text-5xl"></i>
+                            <div><h2 class="text-3xl font-black text-slate-800">${d.weather_jp}</h2><p class="text-sm font-bold text-slate-400">${d.temp}</p></div>
+                        </div>
+                        <div class="flex items-start space-x-3"><i class="fas fa-feather text-sky-300 text-[12px] mt-1.5"></i><p class="text-sm font-medium text-slate-500 italic leading-relaxed opacity-95">${d.haiku}</p></div>
+                    </div>
+                </div>
+
+                <section class="mb-12">
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase mb-6 pl-2 flex items-center tracking-widest stagger-item" style="animation-delay: 0.1s"><i class="fas fa-list-ul mr-2 text-sky-500"></i> Itinerary</h3>
+                    <div class="space-y-4">
+                    ${d.activities.map((act, i) => {
+                        const exp = expandedActivityIdx === i;
+                        return `<div class="glass-card rounded-[28px] overflow-hidden transition-all stagger-item ${exp ? 'ring-1 ring-sky-500/30 shadow-lg' : ''}" style="animation-delay: ${0.2 + (i * 0.1)}s"><div onclick="toggleActivity(${i})" class="p-5 flex items-center cursor-pointer active:bg-white/50"><span class="flex-1 text-[16px] font-bold text-slate-800 tracking-tight pl-2">${act.title}</span><i class="fas ${exp ? 'fa-minus' : 'fa-plus'} text-[10px] text-slate-300"></i></div><div class="${exp ? 'content-expanded' : 'content-collapsed'}"><div class="px-5 pb-5"><div class="p-5 bg-white/30 backdrop-blur-md rounded-2xl border border-white/40"><p class="text-[14px] text-slate-600 leading-relaxed mb-6 font-medium pt-2">${act.desc}</p><div class="space-y-2.5">${act.extraLink ? `<button onclick="window.open('${act.extraLink.url}', '_blank')" class="w-full bg-slate-900 text-white py-4 rounded-xl text-[12px] font-black border border-white flex items-center justify-center shadow-lg"><i class="fas ${act.extraLink.icon} mr-2 text-sm"></i> ${act.extraLink.label}</button>` : ''}<button onclick="openMap('${act.mapLink || act.title}')" class="w-full bg-white/60 text-slate-800 py-4 rounded-xl text-[12px] font-black border border-white flex items-center justify-center"><i class="fas fa-location-arrow mr-2 text-sky-600 text-sm"></i> View on Map</button></div></div></div></div></div>`;
+                    }).join('')}
+                </div></section>
+
+                <div class="grid grid-cols-2 gap-4 mb-12">
+                    <div onclick="openMap('${d.hotel}')" class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center cursor-pointer active:scale-95 transition-all hover:bg-white/40 stagger-item" style="animation-delay: 0.5s">
+                        <i class="fas fa-hotel text-sky-500 mb-3 text-2xl"></i>
+                        <p class="text-[8px] text-slate-400 uppercase mb-1.5 tracking-widest">Stay (Open Map)</p>
+                        <p class="text-[11px] font-bold text-slate-800 leading-snug">${d.hotel}</p>
+                    </div>
+                    <div onclick="toggleTransit()" class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center cursor-pointer active:scale-95 transition-all hover:bg-white/40 stagger-item" style="animation-delay: 0.6s">
+                        <i class="fas fa-train-subway text-indigo-500 mb-3 text-2xl"></i>
+                        <p class="text-[8px] text-slate-400 uppercase mb-1.5 tracking-widest">Transit (Details)</p>
+                        <p class="text-[11px] font-bold text-slate-800 leading-snug">${d.transport}</p>
+                    </div>
+                </div>
+
+                <div id="transit-detail" class="${isTransitExpanded ? 'content-expanded' : 'content-collapsed'} mb-12">
+                    <div class="glass-card p-7 rounded-[32px] border-indigo-200/30">
+                        <div class="flex items-center justify-between mb-4 border-b border-indigo-100 pb-3">
+                            <span class="text-[11px] font-black text-indigo-600 uppercase tracking-[0.2em]">Route Planning</span>
+                            <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(itinerary[currentDayIdx].hotel)}&travelmode=transit','_blank')" class="text-[10px] font-bold text-sky-600 underline">導航至飯店</button>
+                        </div>
+                        <p class="text-[14px] text-slate-600 leading-loose">${d.transit_steps || '無特殊轉乘資訊。'}</p>
+                    </div>
+                </div>
+
+                <section class="glass-card rounded-[32px] p-8 mb-12 stagger-item" style="animation-delay: 0.7s"><h3 class="text-[11px] font-black text-slate-400 uppercase mb-6 flex items-center tracking-widest"><i class="fas fa-utensils mr-2 text-rose-400"></i> Dining</h3><div class="space-y-4"><div onclick="openMap('${d.lunch}')" class="flex items-center justify-between p-5 bg-white/30 rounded-2xl cursor-pointer border border-white/50 shadow-sm"><span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">Lunch</span><span class="text-[14px] font-bold text-slate-800">${d.lunch} <i class="fas fa-arrow-right-long ml-2 text-[10px] opacity-30"></i></span></div><div onclick="openMap('${d.dinner}')" class="flex items-center justify-between p-5 bg-white/30 rounded-2xl cursor-pointer border border-white/50 shadow-sm"><span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">Dinner</span><span class="text-[14px] font-bold text-slate-800">${d.dinner} <i class="fas fa-arrow-right-long ml-2 text-[10px] opacity-30"></i></span></div></div></section>
+                
+                <section class="glass-card rounded-[32px] p-8 mb-16 border-none bg-sky-600/10 dark:bg-sky-500/5 stagger-item" style="animation-delay: 0.8s">
+                    <div class="flex items-center justify-between mb-7">
+                        <h3 class="text-[11px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-widest">Rate Calculator</h3>
+                        <i class="fas fa-calculator text-sky-300"></i>
+                    </div>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-0 text-3xl font-light text-slate-400 font-montserrat italic">¥</span>
+                        <input type="number" id="quick-calc" oninput="updateExchange(this.value)" placeholder="輸入日幣" class="w-full bg-transparent border-b border-slate-200/50 py-4 pl-10 pr-10 text-4xl font-montserrat font-black text-slate-800 focus:outline-none">
+                        <button onclick="clearCalculator()" class="absolute right-0 p-2 text-slate-300 hover:text-sky-500 transition-colors"><i class="fas fa-circle-xmark text-xl"></i></button>
+                    </div>
+                    <div id="twd-res" class="text-2xl font-bold text-sky-600 mt-8 py-3 px-6 bg-white/50 rounded-2xl inline-block shadow-sm">≈ NT$ 0</div>
+                </section>
+            </div>`;
+        }
+
+        function toggleActivity(idx) { expandedActivityIdx = expandedActivityIdx === idx ? null : idx; renderDay(); }
+        function toggleTransit() { isTransitExpanded = !isTransitExpanded; renderDay(); }
+
+        function renderDayButtons() {
+            document.getElementById('day-buttons-container').innerHTML = itinerary.map((d, i) => `
+                <button onclick="switchView('day', ${i})" id="btn-day-${i}" class="day-btn flex-shrink-0 w-12 h-12 rounded-xl bg-white/40 border border-white flex flex-col items-center justify-center transition-all shadow-sm backdrop-blur-md">
+                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">${d.day.split(' ')[1]}</span>
+                    <span class="text-[13px] font-black text-slate-800 leading-none">${d.date.split('/')[1]}</span>
+                </button>`).join('');
+            updateActiveState();
         }
 
         function detectCurrentDay() {
-            const now = new Date(), m = now.getMonth() + 1, d = now.getDate();
-            const datesMap = { "3-26": 0, "3-27": 1, "3-28": 2, "3-29": 3, "3-30": 4, "3-31": 5, "4-1": 6, "4-2": 7 };
+            const now = new Date(), m = now.getMonth() + 1, d = now.getDate(), datesMap = { "3-26": 0, "3-27": 1, "3-28": 2, "3-29": 3, "3-30": 4, "3-31": 5, "4-1": 6, "4-2": 7 };
             if (datesMap.hasOwnProperty(`${m}-${d}`)) currentDayIdx = datesMap[`${m}-${d}`];
         }
 
         function setupScrollerEvents() {
             const scroller = document.getElementById('date-scroll-box'), mL = document.getElementById('mask-l'), mR = document.getElementById('mask-r');
-            const upd = () => {
-                const sL = scroller.scrollLeft, max = scroller.scrollWidth - scroller.clientWidth;
-                mL.style.opacity = sL > 10 ? "1" : "0"; mR.style.opacity = sL < max - 10 ? "1" : "0";
-            };
+            const upd = () => { const sL = scroller.scrollLeft, max = scroller.scrollWidth - scroller.clientWidth; mL.style.opacity = sL > 10 ? "1" : "0"; mR.style.opacity = sL < max - 10 ? "1" : "0"; };
             scroller.addEventListener('scroll', upd, { passive: true });
-            setTimeout(() => {
-                const act = document.getElementById(`btn-day-${currentDayIdx}`);
-                if (act) act.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-                upd();
+            setTimeout(() => { 
+                const act = document.getElementById(currentView === 'shopping' ? 'btn-shopping-nav' : (currentView === 'checklist' ? 'btn-checklist-nav' : `btn-day-${currentDayIdx}`)); 
+                if (act && act.id.startsWith('btn-day')) act.scrollIntoView({ behavior: 'smooth', inline: 'center' }); 
+                upd(); 
             }, 500);
         }
 
         function setupSimplifiedScroll() {
             const infoHeader = document.getElementById('info-header'), stickyNav = document.getElementById('sticky-nav'), b1 = document.getElementById('bg-layer-1'), b2 = document.getElementById('bg-layer-2');
             window.addEventListener('scroll', () => {
-                lastKnownScrollPosition = window.scrollY;
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        infoHeader.style.opacity = Math.max(0, 1 - lastKnownScrollPosition / 100);
-                        infoHeader.style.transform = `translate3d(0, -${lastKnownScrollPosition * 0.4}px, 0)`;
-                        b1.style.transform = `translate3d(0, ${lastKnownScrollPosition * 0.3}px, 0)`;
-                        b2.style.transform = `translate3d(0, ${lastKnownScrollPosition * 0.2}px, 0)`;
-                        if (lastKnownScrollPosition > 50) stickyNav.classList.add('is-stuck'); else stickyNav.classList.remove('is-stuck');
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
+                const y = window.scrollY;
+                window.requestAnimationFrame(() => {
+                    infoHeader.style.opacity = Math.max(0, 1 - y / 120);
+                    infoHeader.style.transform = `translate3d(0, -${y * 0.4}px, 0)`;
+                    b1.style.transform = `translate3d(0, ${y * 0.3}px, 0)`;
+                    b2.style.transform = `translate3d(0, ${y * 0.2}px, 0)`;
+                    if (y > 50) stickyNav.classList.add('is-stuck'); else stickyNav.classList.remove('is-stuck');
+                });
             }, { passive: true });
         }
 
-        function renderDayButtons() {
-            const container = document.getElementById('day-buttons-container');
-            container.innerHTML = itinerary.map((d, i) => `
-                <button onclick="switchView('day', ${i})" id="btn-day-${i}" class="day-btn flex-shrink-0 w-12 h-12 rounded-xl bg-white/40 border border-white flex flex-col items-center justify-center transition-all shadow-sm backdrop-blur-md">
-                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">${d.day.split(' ')[1]}</span>
-                    <span class="text-[13px] font-black text-slate-800 leading-none">${d.date.split('/')[1]}</span>
-                </button>
-            `).join('');
-            updateActiveState();
-        }
-
-        function switchView(view, idx = 0) {
-            currentView = view; if (view === 'day') { currentDayIdx = idx; expandedActivityIdx = null; }
-            updateActiveState(); renderContent(); window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function updateActiveState() {
-            document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('day-active'));
-            if (currentView === 'checklist') document.getElementById('btn-checklist').classList.add('day-active');
-            else if (document.getElementById(`btn-day-${currentDayIdx}`)) document.getElementById(`btn-day-${currentDayIdx}`).classList.add('day-active');
-        }
-
-        function renderContent() { if (currentView === 'checklist') renderChecklist(); else renderDay(); }
-
-        function toggleActivity(idx) { expandedActivityIdx = expandedActivityIdx === idx ? null : idx; renderDay(); }
-
-        function updateExchange(jpy) {
-            const twdResult = document.getElementById('twd-result');
-            const amount = parseFloat(jpy) || 0;
-            twdResult.innerText = `≈ NT$ ${Math.round(amount * JPY_TO_TWD).toLocaleString()}`;
-        }
-
-        function renderDay() {
-            const d = itinerary[currentDayIdx];
-            const area = document.getElementById('content-area');
-            area.innerHTML = `
-                <div class="animate-up">
-                    <div class="glass-card rounded-[32px] p-8 mb-10 relative overflow-hidden">
-                        <div class="relative z-10">
-                            <p class="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em] mb-3">Weather Focus</p>
-                            <div class="flex items-center space-x-4 mb-6">
-                                <i class="fas ${getWeatherIcon(d.weather_jp)} text-4xl"></i>
-                                <div><h2 class="text-3xl font-black text-slate-800">${d.weather_jp}</h2><p class="text-sm font-bold text-slate-400 tracking-wide">${d.temp}</p></div>
-                            </div>
-                            <div class="flex items-start space-x-3"><i class="fas fa-feather text-sky-300 text-[12px] mt-1.5"></i><p class="text-sm font-medium text-slate-500 italic leading-relaxed opacity-95">${d.haiku}</p></div>
-                        </div>
-                    </div>
-                    <section class="mb-12">
-                        <h3 class="text-[11px] font-black text-slate-400 uppercase mb-6 pl-2 flex items-center tracking-widest"><i class="fas fa-list-ul mr-2 text-sky-500"></i> Itinerary</h3>
-                        <div class="space-y-4">
-                        ${d.activities.map((act, i) => {
-                            const exp = expandedActivityIdx === i;
-                            return `<div class="glass-card rounded-[28px] overflow-hidden transition-all ${exp ? 'ring-1 ring-sky-500/30 shadow-lg' : ''}">
-                                <div onclick="toggleActivity(${i})" class="p-5 flex items-center cursor-pointer active:bg-white/50">
-                                    <span class="flex-1 text-[16px] font-bold text-slate-800 tracking-tight pl-2">${act.title}</span>
-                                    <i class="fas ${exp ? 'fa-minus' : 'fa-plus'} text-[10px] text-slate-300"></i>
-                                </div>
-                                <div class="${exp ? 'content-expanded' : 'content-collapsed'}">
-                                    <div class="px-5 pb-5">
-                                        <div class="p-5 bg-white/30 backdrop-blur-md rounded-2xl border border-white/40">
-                                            <p class="text-[14px] text-slate-600 leading-relaxed mb-6 font-medium pt-2">${act.desc}</p>
-                                            <div class="space-y-2.5">
-                                                ${act.extraLink ? `<button onclick="window.open('${act.extraLink.url}', '_blank')" class="w-full bg-slate-900 text-white py-4 rounded-xl text-[12px] font-black tracking-widest uppercase border border-white flex items-center justify-center shadow-lg"><i class="fas ${act.extraLink.icon} mr-2 text-sm"></i> ${act.extraLink.label}</button>` : ''}
-                                                <button onclick="openMap('${act.mapLink || act.title}')" class="w-full bg-white/60 text-slate-800 py-4 rounded-xl text-[12px] font-black uppercase border border-white flex items-center justify-center"><i class="fas fa-location-arrow mr-2 text-sky-600 text-sm"></i> View on Map</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
-                        }).join('')}
-                    </div></section>
-                    <div class="grid grid-cols-2 gap-4 mb-12">
-                        <div class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center"><i class="fas fa-hotel text-sky-500 mb-3 text-lg"></i><p class="text-[8px] text-slate-400 uppercase mb-1.5 tracking-widest">Stay</p><p class="text-[11px] font-bold text-slate-800 leading-snug">${d.hotel}</p></div>
-                        <div class="glass-card p-6 rounded-[32px] flex flex-col items-center text-center"><i class="fas fa-train-subway text-indigo-500 mb-3 text-lg"></i><p class="text-[8px] text-slate-400 uppercase mb-1.5 tracking-widest">Transit</p><p class="text-[11px] font-bold text-slate-800 leading-snug">${d.transport}</p></div>
-                    </div>
-                    <section class="glass-card rounded-[32px] p-8 mb-12"><h3 class="text-[11px] font-black text-slate-400 uppercase mb-6 flex items-center tracking-widest"><i class="fas fa-utensils mr-2 text-rose-400"></i> Dining</h3><div class="space-y-4">
-                        <div onclick="openMap('${d.lunch}')" class="flex items-center justify-between p-5 bg-white/30 rounded-2xl cursor-pointer border border-white/50 shadow-sm"><span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">Lunch</span><span class="text-[14px] font-bold text-slate-800">${d.lunch} <i class="fas fa-arrow-right-long ml-2 text-[10px] opacity-30"></i></span></div>
-                        <div onclick="openMap('${d.dinner}')" class="flex items-center justify-between p-5 bg-white/30 rounded-2xl cursor-pointer border border-white/50 shadow-sm"><span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">Dinner</span><span class="text-[14px] font-bold text-slate-800">${d.dinner} <i class="fas fa-arrow-right-long ml-2 text-[10px] opacity-30"></i></span></div>
-                    </div></section>
-                    
-                    <section class="glass-card rounded-[32px] p-8 mb-16 border-none bg-sky-600/10 dark:bg-sky-500/5">
-                        <div class="flex items-center justify-between mb-7">
-                            <h3 class="text-[11px] font-black uppercase text-sky-600 dark:text-sky-400 tracking-widest">Rate Calculator</h3>
-                            <i class="fas fa-calculator text-sky-300"></i>
-                        </div>
-                        <div class="relative">
-                            <span class="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-light text-slate-400 font-montserrat italic">¥</span>
-                            <input type="number" oninput="updateExchange(this.value)" placeholder="輸入日幣金額" class="w-full bg-transparent border-b border-slate-200/50 py-4 pl-10 text-4xl font-montserrat font-black text-slate-800 focus:border-sky-500 outline-none placeholder:text-slate-300">
-                        </div>
-                        <div id="twd-result" class="text-2xl font-bold text-sky-600 mt-8 py-3 px-6 bg-white/50 rounded-2xl inline-block shadow-sm">≈ NT$ 0</div>
-                    </section>
-                </div>
-            `;
-        }
-
-        function renderChecklist() {
-            const area = document.getElementById('content-area');
-            area.innerHTML = `
-                <div class="animate-up"><div class="mb-12 text-center"><i class="fas fa-suitcase-rolling text-sky-500 text-4xl mb-5"></i><p class="text-sky-600 font-black text-[11px] uppercase tracking-widest mb-1">Checklist</p><h2 class="text-4xl font-black text-slate-800 tracking-tight">行前清單</h2></div>
-                    ${checklistData.map((cat, cIdx) => `<section class="mb-12"><h3 class="text-slate-400 font-black text-[12px] uppercase mb-7 border-l-3 border-sky-400 pl-4 tracking-widest">${cat.category}</h3><div class="grid grid-cols-1 gap-4">
-                        ${cat.items.map((item, iIdx) => {
-                            const isCh = localStorage.getItem(`c${cIdx}-i${iIdx}`) === 'true';
-                            return `<div onclick="toggleChecklist(${cIdx}, ${iIdx})" class="glass-card p-6 rounded-[28px] flex items-center cursor-pointer active:scale-[0.98] transition-all shadow-sm"><div class="w-7 h-7 rounded-full border-2 ${isCh ? 'bg-slate-800 border-slate-800 shadow-lg' : 'border-white'} flex items-center justify-center mr-5">
-                                ${isCh ? `<i class="fas fa-check text-white dark:text-slate-900 text-[10px]"></i>` : ''}
-                            </div><span class="text-[16px] font-bold ${isCh ? 'opacity-40 line-through' : 'text-slate-700'}">${item}</span></div>`;
-                        }).join('')}
-                    </div></section>`).join('')}
-                </div>
-            `;
-        }
-
-        function toggleChecklist(cIdx, iIdx) { 
-            const k = `c${cIdx}-i${iIdx}`; 
-            const cur = localStorage.getItem(k) === 'true';
-            localStorage.setItem(k, !cur);
-            renderChecklist(); 
-        }
-
+        const getWeatherIcon = (d) => {
+            if (d.includes("晴")) return "fa-sun text-amber-500";
+            if (d.includes("雪")) return "fa-snowflake text-sky-300";
+            if (d.includes("雨")) return "fa-cloud-showers-heavy text-indigo-500";
+            return "fa-cloud text-slate-400";
+        };
+        
         function openMap(q) { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`, '_blank'); }
+        function openSubwayMap() { document.getElementById('map-modal').classList.remove('hidden'); document.body.style.overflow='hidden'; toggleSubwayPanel(); }
+        function closeSubwayMap() { document.getElementById('map-modal').classList.add('hidden'); document.body.style.overflow=''; }
+        function toggleSubwayPanel() { document.getElementById('subway-panel').classList.toggle('active'); }
+        
+        function findNearestStation() {
+            const info = document.getElementById('nearest-info'); info.classList.remove('hidden'); info.innerText = "定位中...";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const uLat = pos.coords.latitude, uLng = pos.coords.longitude;
+                let nearest = null, minDist = Infinity;
+                sapSubwayStations.forEach(st => { const d = Math.sqrt(Math.pow(st.lat - uLat, 2) + Math.pow(st.lng - uLng, 2)); if (d < minDist) { minDist = d; nearest = st; } });
+                if (nearest) { info.innerHTML = `最近：<span class="text-sky-500 font-bold">${nearest.name}</span><br>導航中...`; setTimeout(() => { window.open(`https://www.google.com/maps/dir/?api=1&destination=${nearest.lat},${nearest.lng}`, '_blank'); toggleSubwayPanel(); }, 1200); }
+            }, () => { info.innerText = "定位失敗。"; });
+        }
 
         init();
     </script>
